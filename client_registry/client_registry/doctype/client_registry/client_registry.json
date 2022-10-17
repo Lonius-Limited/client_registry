@@ -1,0 +1,144 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "CR.########",
+ "creation": "2022-10-17 10:08:18.764886",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "demographics",
+  "first_name",
+  "middle_name",
+  "last_name",
+  "column_break_5",
+  "gender",
+  "date_of_birth",
+  "phone",
+  "email",
+  "identifiers_section",
+  "identification_number",
+  "passport_number",
+  "huduma_number",
+  "column_break_14",
+  "birth_certificate_number",
+  "birth_notification_number",
+  "institution_numbers_section",
+  "institution_numbers"
+ ],
+ "fields": [
+  {
+   "fieldname": "demographics",
+   "fieldtype": "Data",
+   "label": "Demographics"
+  },
+  {
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "label": "First Name"
+  },
+  {
+   "fieldname": "middle_name",
+   "fieldtype": "Data",
+   "label": "Middle Name (optional)"
+  },
+  {
+   "fieldname": "last_name",
+   "fieldtype": "Data",
+   "label": "Last Name"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Link",
+   "label": "Gender",
+   "options": "Gender"
+  },
+  {
+   "fieldname": "date_of_birth",
+   "fieldtype": "Date",
+   "label": "Date of birth"
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "label": "Phone"
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email"
+  },
+  {
+   "fieldname": "identifiers_section",
+   "fieldtype": "Section Break",
+   "label": "Identifiers"
+  },
+  {
+   "fieldname": "identification_number",
+   "fieldtype": "Data",
+   "label": "Identification Number"
+  },
+  {
+   "fieldname": "passport_number",
+   "fieldtype": "Data",
+   "label": "Passport Number"
+  },
+  {
+   "fieldname": "huduma_number",
+   "fieldtype": "Data",
+   "label": "Huduma Number"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "birth_certificate_number",
+   "fieldtype": "Data",
+   "label": "Birth Certificate Number"
+  },
+  {
+   "fieldname": "birth_notification_number",
+   "fieldtype": "Data",
+   "label": "Birth Notification Number"
+  },
+  {
+   "fieldname": "institution_numbers_section",
+   "fieldtype": "Section Break",
+   "label": "Institution Numbers"
+  },
+  {
+   "fieldname": "institution_numbers",
+   "fieldtype": "Table",
+   "label": "Institution Numbers",
+   "options": "Client Registry Institution Numbers"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-10-17 11:01:36.928699",
+ "modified_by": "Administrator",
+ "module": "Client Registry",
+ "name": "Client Registry",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

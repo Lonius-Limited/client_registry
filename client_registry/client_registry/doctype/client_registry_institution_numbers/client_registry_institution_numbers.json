@@ -1,0 +1,45 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2022-10-17 11:00:48.714367",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "institution_id",
+  "client_number",
+  "institution_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "institution_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Institution ID",
+   "reqd": 1
+  },
+  {
+   "fieldname": "client_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Client Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "institution_name",
+   "fieldtype": "Data",
+   "label": "Institution Name"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-10-17 11:00:48.714367",
+ "modified_by": "Administrator",
+ "module": "Client Registry",
+ "name": "Client Registry Institution Numbers",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
