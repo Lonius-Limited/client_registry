@@ -3,6 +3,7 @@ import json
 
 @frappe.whitelist()
 def client_lookup(payload):
+	# frappe.msgprint(payload.get('client_id'))
 	"""
 	Everything that was posted by the validated EMR to the IOL will be passed in here.
 	We need to search using the parameters provided and if none is found, create and return the CR number back to the IOL
@@ -42,19 +43,19 @@ def client_lookup(payload):
 
 def _map_fields(client_no, payload):
 	client_doc = frappe.get_doc('Client Registry', client_no)
-	payload.client_id = client_no
-	payload.first_name = client_doc.get("first_name")
-	payload.last_name = client_doc.get("last_name")
-	payload.middle_name = client_doc.get("middle_name")
-	payload.gender = client_doc.get("gender")
-	payload.date_of_birth = client_doc.get("date_of_birth")
-	payload.phone = client_doc.get("phone")
-	payload.email = client_doc.get("email")
-	payload.national_id = client_doc.get("identification_number")
-	payload.huduma_no = client_doc.get("huduma_number")
-	payload.passport_no = client_doc.get("passport_number")
-	payload.birth_cert_no = client_doc.get("birth_certificate_number")
-	payload.birth_notification_no = client_doc.get("birth_notification_number")
+	payload.update({'client_id': client_no})
+	payload.update({'first_name': client_doc.get("first_name")})
+	payload.update({'last_name': client_doc.get("last_name")})
+	payload.update({'middle_name': client_doc.get("middle_name")})
+	payload.update({'gender': client_doc.get("gender")})
+	payload.update({'date_of_birth': client_doc.get("date_of_birth")})
+	payload.update({'phone': client_doc.get("phone")})
+	payload.update({'email': client_doc.get("email")})
+	payload.update({'national_id': client_doc.get("identification_number")})
+	payload.update({'huduma_no': client_doc.get("huduma_number")})
+	payload.update({'passport_no': client_doc.get("passport_number")})
+	payload.update({'birth_cert_no': client_doc.get("birth_certificate_number")})
+	payload.update({'birth_notification_no': client_doc.get("birth_notification_number")})
 	return payload
 
 def _register_client(payload):
