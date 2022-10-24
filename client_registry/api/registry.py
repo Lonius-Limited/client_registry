@@ -44,6 +44,31 @@ def client_lookup(payload):
 def _map_fields(client_no, payload):
 	client_doc = frappe.get_doc('Client Registry', client_no)
 	payload.update({'client_id': client_no})
+	if payload.get('first_name'):
+		client_doc.set('first_name', payload.get('first_name'))
+	if payload.get('last_name'):
+		client_doc.set('last_name', payload.get('last_name'))
+	if payload.get('middle_name'):
+		client_doc.set('middle_name', payload.get('middle_name'))
+	if payload.get('gender'):
+		client_doc.set('gender', payload.get('gender'))
+	if payload.get('date_of_birth'):
+		client_doc.set('date_of_birth', payload.get('date_of_birth'))
+	if payload.get('phone'):
+		client_doc.set('phone', payload.get('phone'))
+	if payload.get('email'):
+		client_doc.set('email', payload.get('email'))
+	if payload.get('national_id'):
+		client_doc.set('identification_number', payload.get('national_id'))
+	if payload.get('huduma_no'):
+		client_doc.set('huduma_number', payload.get('huduma_no'))
+	if payload.get('passport_no'):
+		client_doc.set('passport_number', payload.get('passport_no'))
+	if payload.get('birth_cert_no'):
+		client_doc.set('birth_certificate_number', payload.get('birth_cert_no'))
+	if payload.get('birth_notification_no'):
+		client_doc.set('birth_notification_number', payload.get('birth_notification_no'))
+	client_doc.save()
 	payload.update({'first_name': client_doc.get("first_name")})
 	payload.update({'last_name': client_doc.get("last_name")})
 	payload.update({'middle_name': client_doc.get("middle_name")})
