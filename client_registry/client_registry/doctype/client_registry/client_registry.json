@@ -7,24 +7,37 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "demographics",
   "first_name",
   "middle_name",
   "last_name",
+  "full_name",
+  "demographics",
   "column_break_5",
   "gender",
   "date_of_birth",
+  "identifiers_section",
+  "identification_type",
+  "identification_number",
+  "column_break_14",
+  "dependants",
+  "deceasedstatus_tab",
+  "is_alive",
+  "deceased_datetime",
+  "current_address_contacts_and_residence_tab",
   "phone",
   "email",
-  "identifiers_section",
-  "identification_number",
-  "passport_number",
-  "huduma_number",
-  "column_break_14",
-  "birth_certificate_number",
-  "birth_notification_number",
-  "institution_numbers_section",
-  "institution_numbers"
+  "country",
+  "county",
+  "sub_county",
+  "ward",
+  "village",
+  "patient_relation_tab",
+  "related_to",
+  "related_to_full_name",
+  "local_registry_tab",
+  "registry_system",
+  "record_id",
+  "id_hash"
  ],
  "fields": [
   {
@@ -35,7 +48,8 @@
   {
    "fieldname": "first_name",
    "fieldtype": "Data",
-   "label": "First Name"
+   "label": "First Name",
+   "reqd": 1
   },
   {
    "fieldname": "middle_name",
@@ -45,7 +59,8 @@
   {
    "fieldname": "last_name",
    "fieldtype": "Data",
-   "label": "Last Name"
+   "label": "Last Name",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_5",
@@ -55,12 +70,14 @@
    "fieldname": "gender",
    "fieldtype": "Link",
    "label": "Gender",
-   "options": "Gender"
+   "options": "Gender",
+   "reqd": 1
   },
   {
    "fieldname": "date_of_birth",
    "fieldtype": "Date",
-   "label": "Date of birth"
+   "label": "Date of birth",
+   "reqd": 1
   },
   {
    "fieldname": "phone",
@@ -80,50 +97,130 @@
   {
    "fieldname": "identification_number",
    "fieldtype": "Data",
-   "label": "Identification Number"
-  },
-  {
-   "fieldname": "passport_number",
-   "fieldtype": "Data",
-   "label": "Passport Number"
-  },
-  {
-   "fieldname": "huduma_number",
-   "fieldtype": "Data",
-   "label": "Huduma Number"
+   "in_list_view": 1,
+   "label": "Identification Number",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_14",
-   "fieldtype": "Column Break"
+   "fieldtype": "Tab Break",
+   "label": "Next of Kin (Dependants)"
   },
   {
-   "fieldname": "birth_certificate_number",
-   "fieldtype": "Data",
-   "label": "Birth Certificate Number"
+   "fieldname": "identification_type",
+   "fieldtype": "Link",
+   "label": "Identification Type",
+   "options": "Identification Type",
+   "reqd": 1
   },
   {
-   "fieldname": "birth_notification_number",
-   "fieldtype": "Data",
-   "label": "Birth Notification Number"
-  },
-  {
-   "fieldname": "institution_numbers_section",
-   "fieldtype": "Section Break",
-   "label": "Institution Numbers"
-  },
-  {
-   "fieldname": "institution_numbers",
+   "fieldname": "dependants",
    "fieldtype": "Table",
-   "label": "Institution Numbers",
-   "options": "Client Registry Institution Numbers"
+   "label": "Dependants",
+   "options": "Dependants"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_alive",
+   "fieldtype": "Check",
+   "label": "Is Decesed"
+  },
+  {
+   "fieldname": "deceasedstatus_tab",
+   "fieldtype": "Tab Break",
+   "label": "Deceased Status"
+  },
+  {
+   "fieldname": "deceased_datetime",
+   "fieldtype": "Datetime",
+   "label": "Deceased DateTime"
+  },
+  {
+   "fieldname": "current_address_contacts_and_residence_tab",
+   "fieldtype": "Tab Break",
+   "label": "Current Address, Contacts and Residence"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Residence"
+  },
+  {
+   "fieldname": "county",
+   "fieldtype": "Link",
+   "label": "County",
+   "options": "Residence"
+  },
+  {
+   "fieldname": "sub_county",
+   "fieldtype": "Link",
+   "label": "Sub County",
+   "options": "Residence"
+  },
+  {
+   "fieldname": "ward",
+   "fieldtype": "Link",
+   "label": "Ward",
+   "options": "Residence"
+  },
+  {
+   "fieldname": "village",
+   "fieldtype": "Data",
+   "label": "Village"
+  },
+  {
+   "fieldname": "full_name",
+   "fieldtype": "Data",
+   "label": "Full Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "patient_relation_tab",
+   "fieldtype": "Tab Break",
+   "label": "Patient Relation"
+  },
+  {
+   "fieldname": "related_to",
+   "fieldtype": "Link",
+   "label": "Related To",
+   "options": "Client Registry"
+  },
+  {
+   "fieldname": "related_to_full_name",
+   "fieldtype": "Data",
+   "label": "Related to Full Name"
+  },
+  {
+   "fieldname": "local_registry_tab",
+   "fieldtype": "Tab Break",
+   "label": "Local Registry"
+  },
+  {
+   "fieldname": "registry_system",
+   "fieldtype": "Data",
+   "label": "Registry System"
+  },
+  {
+   "fieldname": "record_id",
+   "fieldtype": "Data",
+   "label": "Record ID"
+  },
+  {
+   "fieldname": "id_hash",
+   "fieldtype": "Data",
+   "label": "ID Hash",
+   "read_only": 1,
+   "unique": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-10-24 09:57:11.289880",
+ "modified": "2023-11-03 16:25:55.832261",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -141,5 +238,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
