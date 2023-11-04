@@ -95,13 +95,11 @@ app_license = "MIT"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-#	}
-# }
+doc_events = {
+	"Client Registry": {
+		"before_save": ["client_registry.api.hie_registry.update_dependants","client_registry.api.hie_registry.update_full_name"],
+	}
+}
 
 # Scheduled Tasks
 # ---------------
