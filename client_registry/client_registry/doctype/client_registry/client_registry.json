@@ -33,6 +33,7 @@
   "village",
   "patient_relation_tab",
   "related_to",
+  "relationship",
   "related_to_full_name",
   "local_registry_tab",
   "registry_system",
@@ -172,6 +173,7 @@
   {
    "fieldname": "full_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Full Name",
    "read_only": 1
   },
@@ -212,11 +214,17 @@
    "label": "ID Hash",
    "read_only": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "relationship",
+   "fieldtype": "Select",
+   "label": "Relationship",
+   "options": "\nSpouse\nMother\nFather\nSon\nDaughter\nNuclear Family"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-03 16:25:55.832261",
+ "modified": "2023-11-04 13:30:29.914116",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry",
@@ -239,5 +247,6 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
+ "title_field": "full_name",
  "track_changes": 1
 }
