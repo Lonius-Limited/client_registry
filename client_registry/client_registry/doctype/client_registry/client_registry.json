@@ -39,6 +39,7 @@
   "local_registry_tab",
   "registry_system",
   "record_id",
+  "facility_code",
   "id_hash"
  ],
  "fields": [
@@ -198,7 +199,7 @@
   {
    "fieldname": "local_registry_tab",
    "fieldtype": "Tab Break",
-   "label": "Local Registry"
+   "label": "Origin System"
   },
   {
    "fieldname": "registry_system",
@@ -228,11 +229,17 @@
    "fieldtype": "Select",
    "label": "Marital Status",
    "options": "\nSingle\nMarried\nDivorced\nWidowed"
+  },
+  {
+   "fieldname": "facility_code",
+   "fieldtype": "Data",
+   "label": "Facility Code",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-05 18:16:15.989396",
+ "modified": "2023-11-05 18:47:42.570765",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry",

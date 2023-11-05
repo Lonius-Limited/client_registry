@@ -18,9 +18,9 @@ class ClientRegistry(Document):
 				"lastUpdated": "{}".format(doc.get("modified")),
 				"source": "{}".format(frappe.utils.get_url()),
 			},
-			"identifier": {
-				"system": "".format(doc.get("registry_system")),
-				"value": "".format(doc.get("record_id")),
+			"originSystem": {
+				"system": "{}".format(doc.get("registry_system")),
+				"facility_code": "{}".format(doc.get("facility_code"))
 			},
 			"first_name": doc.get("first_name"),
 			"middle_name": doc.get("middle_name") or "",

@@ -26,9 +26,9 @@ def create_client(payload):
 		payload =json.loads(payload)
 	payload["doctype"] ="Client Registry"
 	payload.pop("resourceType")
-	identifiers =  payload.pop("identifier")
+	identifiers =  payload.pop("originSystem")
 	payload["registry_system"] = identifiers.get("system") or ""
-	payload["record_id"] = identifiers.get("value") or ""
+	payload["facility_code"] = identifiers.get("facility_code") or ""
 	if not payload.get("related_to"):
 		id_payload = dict(identity="{}:{}".format(payload.get("identification_type").lower(), payload.get("identification_number").lower()).replace(" ","_"))
 		encoded_jwt = jwt.encode(id_payload, "secret", algorithm="HS256")
