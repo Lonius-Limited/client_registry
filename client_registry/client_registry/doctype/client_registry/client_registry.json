@@ -122,11 +122,10 @@
    "options": "Dependants"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "is_alive",
    "fieldtype": "Check",
-   "label": "Is Alive",
-   "options": "1"
+   "label": "Is Alive"
   },
   {
    "fieldname": "deceasedstatus_tab",
@@ -233,7 +232,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-05 18:14:06.708494",
+ "modified": "2023-11-05 18:16:15.989396",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry",
