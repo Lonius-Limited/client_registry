@@ -16,6 +16,7 @@
   "gender",
   "date_of_birth",
   "identifiers_section",
+  "marital_status",
   "identification_type",
   "identification_number",
   "column_break_14",
@@ -189,6 +190,7 @@
    "options": "Client Registry"
   },
   {
+   "fetch_from": "related_to.full_name",
    "fieldname": "related_to_full_name",
    "fieldtype": "Data",
    "label": "Related to Full Name"
@@ -220,11 +222,17 @@
    "fieldtype": "Select",
    "label": "Relationship",
    "options": "\nSpouse\nMother\nFather\nSon\nDaughter\nNuclear Family"
+  },
+  {
+   "fieldname": "marital_status",
+   "fieldtype": "Select",
+   "label": "Marital Status",
+   "options": "\nSingle\nMarried\nDivorced\nWidowed"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-04 13:30:29.914116",
+ "modified": "2023-11-05 15:57:23.438744",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry",

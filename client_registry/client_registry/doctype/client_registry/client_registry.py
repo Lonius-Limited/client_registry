@@ -40,6 +40,8 @@ class ClientRegistry(Document):
 			"village": doc.get("village") or "",
 			"related_to": doc.get("related_to") or "",
 			"related_to_full_name": doc.get("related_to_full_name") or "",
+			"relationship": doc.get("relationship") or ""
+    
 		}
 		# frappe.msgprint("{}".format(fhir))
 		return fhir

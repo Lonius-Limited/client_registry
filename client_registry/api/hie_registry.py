@@ -18,7 +18,7 @@ def client_lookup(payload, page_length=20):
 	for record in records:
 		doc = frappe.get_doc("Client Registry", record.get("name"))
 		result.append(doc.to_fhir())
-	return result
+	return dict(total=len(result), result=result)
 @frappe.whitelist()
 def create_client(payload):
 	# return type(payload)
@@ -44,7 +44,8 @@ def validate_resource_type(resource):
 		return dict(status="error",error_desc="Invalid resource")
 def update_dependants(doc, state):
 	if not doc.get("related_to"): return
-	is_dependant_of_doc = frappe.get_doc("Client Registry",doc.get("related_to")) 
+	is_dependant_of_doc = frappe.get_doc("Client Registry",doc.get("related_to"))
+	# if (is_dependant_of_doc.get("related_to")==doc.get("name")): frappe.throw("Sorry, cyclic dependency detected.")
 	client_dependants = is_dependant_of_doc.get("dependants")
 	records = [x.get("linked_record") for x in client_dependants]
 	if doc.get("name") in records: return
@@ -59,6 +60,10 @@ def update_dependants(doc, state):
 		"linked_record": doc.get("name")
 	})
 	is_dependant_of_doc.save()
+def update_full_name(doc, state):
+	full_name = "{} {} {}".format(doc.get("first_name"),doc.get("middle_name") or "",doc.get("last_name"))
+	doc.set("full_name", full_name)
+
 	
 	
 	
