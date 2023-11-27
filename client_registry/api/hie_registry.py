@@ -1,7 +1,7 @@
 import frappe
 import json
 import jwt
-
+import numpy as np
 
 @frappe.whitelist()
 def client_lookup(payload, page_length=20):
@@ -33,12 +33,21 @@ def create_client(payload):
 		id_payload = dict(identity="{}:{}".format(payload.get("identification_type").lower(), payload.get("identification_number").lower()).replace(" ","_"))
 		encoded_jwt = jwt.encode(id_payload, "secret", algorithm="HS256")
 		payload["id_hash"] = encoded_jwt
-	doc = frappe.get_doc(payload).insert()
+	doc = frappe.get_doc(payload).save()
+	# cd = doc.get_checkdigit(doc.get("name"))
+	# frappe.rename_doc('Client Registry', doc.get("name"), '{}-{}'.format(doc.get("name"),cd))
 	frappe.db.commit()
 	return doc.to_fhir()
 @frappe.whitelist()
-def update_patient(payload):#TBD
-	args = frappe.get_all("Client Registry", payload.get("id"))
+def update_client(payload):#TBD
+	doc = frappe.get_doc("Client Registry", payload.pop("id"))
+	valid_keys = list(dict.fromkeys(doc.__dict__))
+	keys = [x for x in list(dict.fromkeys(payload)) if x in valid_keys] #Don't send bogus keys, we won't bother. Is it a good idea?
+	for k in keys:
+		doc.set(k, payload[k])
+	doc.save()
+	frappe.db.commit()
+	return doc.to_fhir()
 def validate_resource_type(resource):
 	if not resource.get("Patient"):
 		return dict(status="error",error_desc="Invalid resource")
@@ -63,6 +72,8 @@ def update_dependants(doc, state):
 def update_full_name(doc, state):
 	full_name = "{} {} {}".format(doc.get("first_name"),doc.get("middle_name") or "",doc.get("last_name"))
 	doc.set("full_name", full_name)
+def base36encode(number):
+	return np.base_repr(number, 36)
 
 	
 	

@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "CR.########",
+ "autoname": "format:UPI-{facility_code}-{YYYY}-{######}",
  "creation": "2022-10-17 10:08:18.764886",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -40,7 +40,9 @@
   "registry_system",
   "record_id",
   "facility_code",
-  "id_hash"
+  "id_hash",
+  "unique_patient_identifier",
+  "check_digit"
  ],
  "fields": [
   {
@@ -235,15 +237,26 @@
    "fieldtype": "Data",
    "label": "Facility Code",
    "reqd": 1
+  },
+  {
+   "fieldname": "unique_patient_identifier",
+   "fieldtype": "Data",
+   "label": "Unique Patient Identifier",
+   "read_only": 1
+  },
+  {
+   "fieldname": "check_digit",
+   "fieldtype": "Data",
+   "label": "Check Digit"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-05 18:47:42.570765",
+ "modified": "2023-11-27 14:01:53.013215",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry",
- "naming_rule": "Expression (old style)",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
