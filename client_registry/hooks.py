@@ -90,7 +90,7 @@ app_license = "MIT"
 # override_doctype_class = {
 # 	"ToDo": "custom_app.overrides.CustomToDo"
 # }
-
+after_migrate =["client_registry.execute"]
 # Document Events
 # ---------------
 # Hook on document methods and events
@@ -184,3 +184,9 @@ user_data_fields = [
 # Recommended only for DocTypes which have limited documents with untranslated names
 # For example: Role, Gender, etc.
 # translated_search_doctypes = []
+website_route_rules = [
+	{
+		"from_route": "/frontend/<path:app_path>",
+		"to_route": "frontend",
+	},
+]
