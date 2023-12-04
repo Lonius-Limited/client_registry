@@ -25,7 +25,7 @@ def create_client(payload):
 	if isinstance(payload, str):
 		payload =json.loads(payload)
 	payload["doctype"] ="Client Registry"
-	payload.pop("resourceType")
+	payload = payload.pop("resourceType")
 	identifiers =  payload.pop("originSystem")
 	payload["registry_system"] = identifiers.get("system") or ""
 	payload["facility_code"] = identifiers.get("facility_code") or ""
