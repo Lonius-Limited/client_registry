@@ -16,6 +16,7 @@ class ClientRegistry(Document):
 			"id": "{}".format(doc.get("name")),
 			"meta": {
 				"versionId": "1",
+				"creationTime": "{}".format(doc.get("creation")),
 				"lastUpdated": "{}".format(doc.get("modified")),
 				"source": "{}".format(frappe.utils.get_url()),
 			},
