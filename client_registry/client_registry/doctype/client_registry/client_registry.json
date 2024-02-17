@@ -46,7 +46,8 @@
   "facility_code",
   "id_hash",
   "unique_patient_identifier",
-  "check_digit"
+  "check_digit",
+  "full_hash"
  ],
  "fields": [
   {
@@ -273,11 +274,17 @@
    "fieldtype": "Link",
    "label": "Nationality",
    "options": "Nationality"
+  },
+  {
+   "fieldname": "full_hash",
+   "fieldtype": "Long Text",
+   "label": "Full Hash",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-17 14:27:32.576106",
+ "modified": "2024-02-18 00:36:57.881453",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry",
