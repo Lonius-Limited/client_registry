@@ -29,9 +29,11 @@ class ClientRegistry(Document):
 			"last_name": doc.get("last_name") or "",
 			"gender": doc.get("gender"),
 			"date_of_birth": doc.get("date_of_birth"),
+			"nationality": doc.get("nationality"),
    			"marital_status": doc.get("marital_status"),
 			"identification_type": doc.get("identification_type"),
 			"identification_number": doc.get("identification_number"),
+			"other_identifications": self._other_identifications(),
 			"next_of_kins": self.next_of_kins(),
 			"is_alive": doc.get("is_alive") ,
 			"deceased_datetime": doc.get("deceased_datetime") or "",
@@ -45,6 +47,7 @@ class ClientRegistry(Document):
 			"related_to": doc.get("related_to") or "",
 			"related_to_full_name": doc.get("related_to_full_name") or "",
 			"relationship": doc.get("relationship") or "",
+			"id_hash": doc.get("id_hash")
 
 	
 		}
@@ -57,6 +60,14 @@ class ClientRegistry(Document):
 		for d in payload:
 			dependants.append(d.as_dict())
 		return dependants
+	def _other_identifications(self):
+		payload = self.get("other_identifications")
+		# other_ids = []
+		# if not payload: return other_ids
+		# for id in payload:
+		# 	other_ids.append(id.as_dict())
+		# return other_ids # 
+		return list(map(lambda x: dict(identification_type=x.get("identification_type"), identification_number=x.get("identification_number")) ,payload))
 	def make_check_digit(self):
 		old_doc = self.get_doc_before_save()
 		if old_doc: return
