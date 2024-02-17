@@ -1,0 +1,42 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-02-17 14:00:33.098449",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "identification_type",
+  "identification_number"
+ ],
+ "fields": [
+  {
+   "fieldname": "identification_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Identification Type",
+   "options": "Identification Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "identification_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Identification Number",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2024-02-17 14:00:33.098449",
+ "modified_by": "Administrator",
+ "module": "Client Registry",
+ "name": "Client Identifier",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

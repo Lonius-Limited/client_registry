@@ -15,7 +15,7 @@ def client_lookup(payload):
 	if national_id:
 		main_table_filters['identification_number'] = national_id
 	if huduma_no:
-		main_table_filters['huduma_number'] = huduma_number
+		main_table_filters['huduma_number'] = huduma_no
 	if passport_no:
 		main_table_filters['passport_number'] = passport_no
 	if birth_cert_no:
@@ -37,7 +37,7 @@ def client_lookup(payload):
 		_update_institution_number(client_no, payload)
 		return _map_fields(client_no, payload)
 	else:
-		#CREATE A NEW RECORD:
+		#CREATE A NEW RECORD -:
 		client_no = _register_client(payload)
 		return _map_fields(client_no, payload)
 
