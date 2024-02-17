@@ -15,10 +15,13 @@
   "column_break_5",
   "gender",
   "date_of_birth",
-  "identifiers_section",
   "marital_status",
+  "identifiers_section",
   "identification_type",
+  "column_break_47bdy",
   "identification_number",
+  "other_ids_section",
+  "other_identifications",
   "column_break_14",
   "dependants",
   "deceasedstatus_tab",
@@ -27,6 +30,7 @@
   "current_address_contacts_and_residence_tab",
   "phone",
   "email",
+  "nationality",
   "country",
   "county",
   "sub_county",
@@ -229,7 +233,7 @@
   {
    "fieldname": "marital_status",
    "fieldtype": "Select",
-   "label": "Marital Status",
+   "label": "Civil Status",
    "options": "\nSingle\nMarried\nDivorced\nWidowed"
   },
   {
@@ -248,11 +252,32 @@
    "fieldname": "check_digit",
    "fieldtype": "Data",
    "label": "Check Digit"
+  },
+  {
+   "fieldname": "other_identifications",
+   "fieldtype": "Table",
+   "label": "Other Identifiers",
+   "options": "Client Identifier"
+  },
+  {
+   "fieldname": "column_break_47bdy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "other_ids_section",
+   "fieldtype": "Section Break",
+   "label": "Other Ids"
+  },
+  {
+   "fieldname": "nationality",
+   "fieldtype": "Link",
+   "label": "Nationality",
+   "options": "Nationality"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-27 14:01:53.013215",
+ "modified": "2024-02-17 14:27:32.576106",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry",
