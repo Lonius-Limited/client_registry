@@ -40,7 +40,8 @@ def create_client(payload):
 	if not payload.get("related_to"):
 		id_payload = dict(identity="{}:{}".format(payload.get("identification_type").lower(), payload.get("identification_number").lower()).replace(" ","_"))
 		encoded_jwt = jwt.encode(id_payload, secret , algorithm="HS256")
-		payload["id_hash"] = encoded_jwt
+		payload["id_hash"] = encoded_jwt[:140]
+		payload["full_hash"] = encoded_jwt
 	doc = frappe.get_doc(payload)
 	if other_ids:
 		doc = update_other_ids(doc, other_ids)

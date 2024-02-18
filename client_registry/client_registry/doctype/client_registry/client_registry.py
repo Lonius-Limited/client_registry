@@ -15,7 +15,8 @@ class ClientRegistry(Document):
 		secret = "{}:{}".format(self.last_name,self.date_of_birth)
 		id_payload = dict(identity="{}:{}".format(self.get("identification_type").lower(), self.get("identification_number").lower()).replace(" ","_"))
 		encoded_jwt = jwt.encode(id_payload, secret , algorithm="HS256")
-		self.id_hash = encoded_jwt
+		self.id_hash = encoded_jwt[:140]
+		self.full_hash = encoded_jwt
 	def to_fhir(self):
 		doc = self
 		fhir = {
@@ -55,7 +56,7 @@ class ClientRegistry(Document):
 			# "related_to": doc.get("related_to") or "",
 			# "related_to_full_name": doc.get("related_to_full_name") or "",
 			# "relationship": doc.get("relationship") or "",
-			"id_hash": doc.get("id_hash")
+			"id_hash": doc.get("full_hash")
 
 	
 		}
