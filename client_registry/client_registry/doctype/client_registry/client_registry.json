@@ -257,7 +257,7 @@
   {
    "fieldname": "other_identifications",
    "fieldtype": "Table",
-   "label": "Other Identifiers",
+   "label": "Other Identifications",
    "options": "Client Identifier"
   },
   {
@@ -284,7 +284,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-18 00:36:57.881453",
+ "modified": "2024-02-18 15:13:49.572289",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry",
