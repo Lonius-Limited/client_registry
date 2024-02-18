@@ -130,9 +130,6 @@ def _test_manually_add_dependants():
     to_update=dict(id="CR00000001", dependants=dependants)
     print("Sending,===>", to_update)
     update_client(to_update)
-    
-        
-# Old ==> zsSN_H_ydw_UWGPCm6N7m7xNfJhY5fSTcsr-sa7-un4=
 	
 	
 	
