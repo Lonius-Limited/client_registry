@@ -1,7 +1,7 @@
 import frappe
 import json
 import jwt
-import numpy as np
+# import numpy as np
 
 @frappe.whitelist()
 def client_lookup(payload, page_length=5):
