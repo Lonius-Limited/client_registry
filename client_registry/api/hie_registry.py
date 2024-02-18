@@ -44,25 +44,13 @@ def create_client(payload):
 		payload["full_hash"] = encoded_jwt
 	doc = frappe.get_doc(payload)
 	if other_ids:
-		doc = update_other_ids(doc, other_ids)
+		for id_obj in other_ids:
+			doc.append("other_identifications",id_obj)
 	doc.save()
 	# cd = doc.get_checkdigit(doc.get("name"))
 	# frappe.rename_doc('Client Registry', doc.get("name"), '{}-{}'.format(doc.get("name"),cd))
 	frappe.db.commit()
-	return doc.to_fhir()
-def update_other_ids(doc, other_ids):
-    #Example:  [{'identification_type': 'Passport', 'identification_number': '64737838983'}]
-    print("length: ",len(other_ids))
-    docname = doc.get("name")
-    filter_out_exists = list(filter(lambda x: not frappe.db.get_value("Client Identifier",dict(identification_type = x.get("identification_type"),identification_number = x.get("identification_number"), parent=docname), "name"),other_ids))
-    count = 0
-    for id_obj in filter_out_exists:
-        count += 1
-        print("Loop {}".format(count))
-        # row = 
-        doc.append("other_identifications",id_obj)
-        doc.save()
-    return doc.reload()      
+	return doc.to_fhir()    
 @frappe.whitelist()
 def update_client(payload):#TBD
 	doc = frappe.get_doc("Client Registry", payload.pop("id"))
@@ -72,11 +60,16 @@ def update_client(payload):#TBD
 		doc.set(k, payload[k])
 	other_ids = payload.pop("other_identifications", None)
 	dependants = payload.pop("dependants", None)
+	doc.save()
 	if other_ids:
-		doc = update_other_ids(doc, other_ids)
+		print("\nPreparing to enter ==> {} records".format(len(other_ids)))
+		for id_obj in other_ids:
+			doc.append("other_identification_docs",id_obj)
+		doc.save()
+		doc.reload()
 	if dependants:
 		update_dependants_manually(doc, dependants)
-	doc.save()
+		doc.reload()
 	frappe.db.commit()
 	return doc.to_fhir()
 def validate_resource_type(resource):
@@ -121,8 +114,8 @@ def fetch_based_on_other_identifiers(search_args):
     if not docname: return []
     return frappe.get_all("Client Registry", filters=dict(name=docname), fields="*")
 def _test_update_identifiers():
-    other_ids=dict(identification_type="Birth Certificate", identification_number="27613716-234")
-    to_update=dict(id="CR00000001", other_identifications=[other_ids])
+    _other_ids=dict(identification_type="Passport", identification_number="Z7A234")
+    to_update=dict(id="UPI-64557-2023-000002", other_identifications=[_other_ids])
     print("Sending,===>", to_update)
     update_client(to_update)
 def _test_manually_add_dependants():
