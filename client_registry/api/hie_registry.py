@@ -59,8 +59,10 @@ def update_other_ids(doc, other_ids):
     for id_obj in filter_out_exists:
         count += 1
         print("Loop {}".format(count))
+        # row = 
         doc.append("other_identifications",id_obj)
-    return doc      
+        doc.save()
+    return doc.reload()      
 @frappe.whitelist()
 def update_client(payload):#TBD
 	doc = frappe.get_doc("Client Registry", payload.pop("id"))
