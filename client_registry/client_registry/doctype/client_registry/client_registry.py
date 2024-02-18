@@ -1,14 +1,21 @@
 # Copyright (c) 2022, Lonius Limited and contributors
 # For license information, please see license.txt
 
-import frappe
+import frappe, jwt
 from frappe.model.document import Document
 
 class ClientRegistry(Document):
 	def before_save(self):
 		self.make_check_digit()
+		self.generate_hash()
 		self.to_fhir()
 		# pass
+	def generate_hash(self):
+		# if not self.get("related_to"):
+		secret = "{}:{}".format(self.last_name,self.date_of_birth)
+		id_payload = dict(identity="{}:{}".format(self.get("identification_type").lower(), self.get("identification_number").lower()).replace(" ","_"))
+		encoded_jwt = jwt.encode(id_payload, secret , algorithm="HS256")
+		self.id_hash = encoded_jwt
 	def to_fhir(self):
 		doc = self
 		fhir = {
@@ -34,19 +41,20 @@ class ClientRegistry(Document):
 			"identification_type": doc.get("identification_type"),
 			"identification_number": doc.get("identification_number"),
 			"other_identifications": self._other_identifications(),
-			"next_of_kins": self.next_of_kins(),
+			"dependants": self.next_of_kins(),
 			"is_alive": doc.get("is_alive") ,
 			"deceased_datetime": doc.get("deceased_datetime") or "",
 			"phone": doc.get("phone") or "",
 			"email": doc.get("email") or "",
+			"nationality": doc.get("") or "",
 			"country": doc.get("country") or "",
 			"county": doc.get("country") or "",
 			"sub_county": doc.get("sub_county") or "",
 			"ward": doc.get("ward") or "",
 			"village": doc.get("village") or "",
-			"related_to": doc.get("related_to") or "",
-			"related_to_full_name": doc.get("related_to_full_name") or "",
-			"relationship": doc.get("relationship") or "",
+			# "related_to": doc.get("related_to") or "",
+			# "related_to_full_name": doc.get("related_to_full_name") or "",
+			# "relationship": doc.get("relationship") or "",
 			"id_hash": doc.get("id_hash")
 
 	
@@ -54,12 +62,14 @@ class ClientRegistry(Document):
 		# frappe.msgprint("{}".format(fhir))
 		return fhir
 	def next_of_kins(self):
+     
 		payload = self.get("dependants")
-		dependants =[]
-		if not payload : return dependants
-		for d in payload:
-			dependants.append(d.as_dict())
-		return dependants
+		return list(map(lambda x: dict(linked_record=x.get("linked_record"), full_name="{} {}".format(x.get("first_name"), x.get("last_name")), relationship=x.get("relationship")) ,payload))
+		# dependants =[]
+		# if not payload : return dependants
+		# for d in payload:
+		# 	dependants.append(d.as_dict())
+		# return dependants
 	def _other_identifications(self):
 		payload = self.get("other_identifications")
 		# other_ids = []

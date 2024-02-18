@@ -38,7 +38,7 @@ def create_client(payload):
 	secret = "{}:{}".format(last_name,date_of_birth)
 	other_ids = payload.pop("other_identifications", None)
 	if not payload.get("related_to"):
-		id_payload = dict(identity="{}:{}".format(payload.get("secret").lower(), payload.get("identification_number").lower()).replace(" ","_"))
+		id_payload = dict(identity="{}:{}".format(payload.get("identification_type").lower(), payload.get("identification_number").lower()).replace(" ","_"))
 		encoded_jwt = jwt.encode(id_payload, secret , algorithm="HS256")
 		payload["id_hash"] = encoded_jwt
 	doc = frappe.get_doc(payload)
