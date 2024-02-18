@@ -87,18 +87,6 @@ def update_dependants_manually(doc, dependants):
 		dependant_doc.related_to = docname
 		dependant_doc.relationship = _dependant.get("relationship")
 		dependant_doc.save()
-		# args = {
-		# 	"first_name": dependant_doc.get("first_name"),
-		# 	"middle_name": dependant_doc.get("middle_name") or "",
-		# 	"last_name": dependant_doc.get("last_name"),
-		# 	"gender": dependant_doc.get("gender"),
-		# 	"relationship": _dependant.get("relationship"),
-		# 	"identification_type": dependant_doc.get("identification_type"),
-		# 	"identification_number": dependant_doc.get("identification_number"),
-		# 	"linked_record": _dependant.get("id")
-		# }
-		# print("\n-",args)
-		# doc.append("dependants", args)
 	return doc.reload()
 def update_dependants(doc, state):
 	if not doc.get("related_to"): return
@@ -142,9 +130,6 @@ def _test_manually_add_dependants():
     to_update=dict(id="CR00000001", dependants=dependants)
     print("Sending,===>", to_update)
     update_client(to_update)
-    
-        
-
 	
 	
 	
