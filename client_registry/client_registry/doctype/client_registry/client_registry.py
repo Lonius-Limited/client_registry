@@ -8,6 +8,7 @@ class ClientRegistry(Document):
 	def before_save(self):
 		self.make_check_digit()
 		self.generate_hash()
+		self.check_duplicate_ids()
 		self.to_fhir()
 		# pass
 	def generate_hash(self):
@@ -72,7 +73,7 @@ class ClientRegistry(Document):
 		# 	dependants.append(d.as_dict())
 		# return dependants
 	def _other_identifications(self):
-		payload = self.get("other_identifications")
+		payload = self.get("other_identification_docs")
 		# other_ids = []
 		# if not payload: return other_ids
 		# for id in payload:

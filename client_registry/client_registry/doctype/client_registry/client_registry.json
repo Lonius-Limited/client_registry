@@ -22,7 +22,7 @@
   "column_break_47bdy",
   "identification_number",
   "other_ids_section",
-  "other_identifications",
+  "other_identification_docs",
   "column_break_14",
   "dependants",
   "deceasedstatus_tab",
@@ -255,12 +255,6 @@
    "label": "Check Digit"
   },
   {
-   "fieldname": "other_identifications",
-   "fieldtype": "Table",
-   "label": "Other Identifications",
-   "options": "Client Identifier"
-  },
-  {
    "fieldname": "column_break_47bdy",
    "fieldtype": "Column Break"
   },
@@ -280,11 +274,17 @@
    "fieldtype": "Long Text",
    "label": "Full Hash",
    "read_only": 1
+  },
+  {
+   "fieldname": "other_identification_docs",
+   "fieldtype": "Table",
+   "label": "Other Identification Docs",
+   "options": "Client Identifier"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-18 20:00:34.120425",
+ "modified": "2024-02-19 00:44:52.654886",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry",
