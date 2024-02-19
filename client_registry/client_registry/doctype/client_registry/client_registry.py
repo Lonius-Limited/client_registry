@@ -5,17 +5,39 @@ import frappe, jwt
 from frappe.model.document import Document
 
 class ClientRegistry(Document):
+	# def autoname(self):
+	# 	pass
 	def before_save(self):
+		self.set_custom_name()
 		self.make_check_digit()
 		self.generate_hash()
 		self.check_duplicate_ids()
 		self.to_fhir()
 		# pass
+	def after_insert(self):
+		self.update_dependants()
+	def set_custom_name(self):
+		old_doc = self.get_doc_before_save()
+		if old_doc: return
+		name_format =""
+		gender_id = frappe.get_value("Gender", self.get("gender"),"custom_gender_id")
+		identification_number = self.get("identification_number")
+		if self.related_to:
+			related_to = frappe.get_doc("Client Registry", self.related_to)
+			identification_number = related_to.get("identification_number")
+			current_dependants =  len(related_to.get("dependants") or []) + 1  #27613716
+			if (current_dependants<10 ): current_dependants = "0{}".format(current_dependants)
+			name_format = "{}-{}-{}-D".format(identification_number,gender_id, current_dependants)
+		else:
+			name_format = "{}-{}-P".format(identification_number,gender_id)
+		self.set('name', name_format)
+		# frappe.rename_doc('Client Registry', self.get("name"), '{}-{}'.format(self.get("name"),cd))
+		frappe.db.commit()
 	def check_duplicate_ids(self):
 		pass
 	def generate_hash(self):
-		# if not self.get("related_to"):
-		secret = "{}:{}".format(self.last_name,self.date_of_birth)
+		if self.get("related_to"): return
+		secret = "{}".format(self.date_of_birth)
 		id_payload = dict(identity="{}:{}".format(self.get("identification_type").lower(), self.get("identification_number").lower()).replace(" ","_"))
 		encoded_jwt = jwt.encode(id_payload, secret , algorithm="HS256")
 		self.id_hash = encoded_jwt[:140]
@@ -66,7 +88,7 @@ class ClientRegistry(Document):
 		# frappe.msgprint("{}".format(fhir))
 		return fhir
 	def next_of_kins(self):
-     
+	 
 		payload = self.get("dependants")
 		return list(map(lambda x: dict(linked_record=x.get("linked_record"), full_name="{} {}".format(x.get("first_name"), x.get("last_name")), relationship=x.get("relationship")) ,payload))
 		# dependants =[]
@@ -82,6 +104,24 @@ class ClientRegistry(Document):
 		# 	other_ids.append(id.as_dict())
 		# return other_ids # 
 		return list(map(lambda x: dict(identification_type=x.get("identification_type"), identification_number=x.get("identification_number")) ,payload))
+	def update_dependants(self):
+		if not self.get("related_to"): return
+		is_dependant_of_doc = frappe.get_doc("Client Registry",self.get("related_to"))
+		# if (is_dependant_of_doc.get("related_to")==doc.get("name")): frappe.throw("Sorry, cyclic dependency detected.")
+		client_dependants = is_dependant_of_doc.get("dependants")
+		records = [x.get("linked_record") for x in client_dependants]
+		if self.get("name") in records: return
+		is_dependant_of_doc.append("dependants", {
+			"first_name": self.get("first_name"),
+			"middle_name": self.get("middle_name") or "",
+			"last_name": self.get("last_name"),
+			"gender": self.get("gender"),
+			"relationship": self.get("relationship"),
+			"identification_type": self.get("identification_type"),
+			"identification_number": self.get("identification_number"),
+			"linked_record": self.get("name")
+		})
+		is_dependant_of_doc.save()
 	def make_check_digit(self):
 		old_doc = self.get_doc_before_save()
 		if old_doc: return

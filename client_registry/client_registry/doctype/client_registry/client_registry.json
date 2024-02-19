@@ -1,7 +1,6 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:UPI-{facility_code}-{YYYY}-{######}",
  "creation": "2022-10-17 10:08:18.764886",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -102,7 +101,7 @@
   {
    "fieldname": "identifiers_section",
    "fieldtype": "Section Break",
-   "label": "Identifiers"
+   "label": "Primary Identifiers"
   },
   {
    "fieldname": "identification_number",
@@ -284,11 +283,10 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-19 00:44:52.654886",
+ "modified": "2024-02-19 23:34:05.784519",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry",
- "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

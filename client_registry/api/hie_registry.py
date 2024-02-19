@@ -37,11 +37,11 @@ def create_client(payload):
 	payload["facility_code"] = identifiers.get("facility_code") or ""
 	secret = "{}:{}".format(last_name,date_of_birth)
 	other_ids = payload.pop("other_identifications", None)
-	if not payload.get("related_to"):
-		id_payload = dict(identity="{}:{}".format(payload.get("identification_type").lower(), payload.get("identification_number").lower()).replace(" ","_"))
-		encoded_jwt = jwt.encode(id_payload, secret , algorithm="HS256")
-		payload["id_hash"] = encoded_jwt[:140]
-		payload["full_hash"] = encoded_jwt
+	# if not payload.get("related_to"):
+	# 	id_payload = dict(identity="{}:{}".format(payload.get("identification_type").lower(), payload.get("identification_number").lower()).replace(" ","_"))
+	# 	encoded_jwt = jwt.encode(id_payload, secret , algorithm="HS256")
+	# 	payload["id_hash"] = encoded_jwt[:140]
+	# 	payload["full_hash"] = encoded_jwt
 	doc = frappe.get_doc(payload)
 	if other_ids:
 		for id_obj in other_ids:
@@ -84,48 +84,48 @@ def update_dependants_manually(doc, dependants):
 		dependant_doc.relationship = _dependant.get("relationship")
 		dependant_doc.save()
 	return doc.reload()
-def update_dependants(doc, state):
-	if not doc.get("related_to"): return
-	is_dependant_of_doc = frappe.get_doc("Client Registry",doc.get("related_to"))
-	# if (is_dependant_of_doc.get("related_to")==doc.get("name")): frappe.throw("Sorry, cyclic dependency detected.")
-	client_dependants = is_dependant_of_doc.get("dependants")
-	records = [x.get("linked_record") for x in client_dependants]
-	if doc.get("name") in records: return
-	is_dependant_of_doc.append("dependants", {
-		"first_name": doc.get("first_name"),
-		"middle_name": doc.get("middle_name") or "",
-		"last_name": doc.get("last_name"),
-		"gender": doc.get("gender"),
-		"relationship": doc.get("relationship"),
-		"identification_type": doc.get("identification_type"),
-		"identification_number": doc.get("identification_number"),
-		"linked_record": doc.get("name")
-	})
-	is_dependant_of_doc.save()
+# def update_dependants(doc, state):
+# 	if not doc.get("related_to"): return
+# 	is_dependant_of_doc = frappe.get_doc("Client Registry",doc.get("related_to"))
+# 	# if (is_dependant_of_doc.get("related_to")==doc.get("name")): frappe.throw("Sorry, cyclic dependency detected.")
+# 	client_dependants = is_dependant_of_doc.get("dependants")
+# 	records = [x.get("linked_record") for x in client_dependants]
+# 	if doc.get("name") in records: return
+# 	is_dependant_of_doc.append("dependants", {
+# 		"first_name": doc.get("first_name"),
+# 		"middle_name": doc.get("middle_name") or "",
+# 		"last_name": doc.get("last_name"),
+# 		"gender": doc.get("gender"),
+# 		"relationship": doc.get("relationship"),
+# 		"identification_type": doc.get("identification_type"),
+# 		"identification_number": doc.get("identification_number"),
+# 		"linked_record": doc.get("name")
+# 	})
+# 	is_dependant_of_doc.save()
 def update_full_name(doc, state):
 	full_name = "{} {} {}".format(doc.get("first_name"),doc.get("middle_name") or "",doc.get("last_name"))
 	doc.set("full_name", full_name)
 def base36encode(number):
 	return np.base_repr(number, 36)
 def fetch_based_on_other_identifiers(search_args):
-    arg_keys = list(dict.fromkeys(search_args))
-    print("Finding in other identifiers")
-    docname = frappe.db.get_value("Client Identifier", search_args, "parent")
-    if not docname: return []
-    return frappe.get_all("Client Registry", filters=dict(name=docname), fields="*")
+	arg_keys = list(dict.fromkeys(search_args))
+	print("Finding in other identifiers")
+	docname = frappe.db.get_value("Client Identifier", search_args, "parent")
+	if not docname: return []
+	return frappe.get_all("Client Registry", filters=dict(name=docname), fields="*")
 def _test_update_identifiers():
-    _other_ids=dict(identification_type="Passport", identification_number="Z7A234")
-    to_update=dict(id="UPI-64557-2023-000002", other_identifications=[_other_ids])
-    print("Sending,===>", to_update)
-    update_client(to_update)
+	_other_ids=dict(identification_type="Passport", identification_number="Z7A234")
+	to_update=dict(id="UPI-64557-2023-000002", other_identifications=[_other_ids])
+	print("Sending,===>", to_update)
+	update_client(to_update)
 def _test_manually_add_dependants():
-    upis =["UPI-64557-2023-000002","UPI-15706-2023-000007-3"]
-    dependants = []
-    for upi in upis:
-        dependants.append(dict(id=upi,relationship="Son"))
-    to_update=dict(id="CR00000001", dependants=dependants)
-    print("Sending,===>", to_update)
-    update_client(to_update)
+	upis =["UPI-64557-2023-000002","UPI-15706-2023-000007-3"]
+	dependants = []
+	for upi in upis:
+		dependants.append(dict(id=upi,relationship="Son"))
+	to_update=dict(id="CR00000001", dependants=dependants)
+	print("Sending,===>", to_update)
+	update_client(to_update)
 	
 	
 	
