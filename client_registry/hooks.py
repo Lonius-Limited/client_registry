@@ -8,7 +8,7 @@ app_icon = "octicon octicon-file-directory"
 app_color = "grey"
 app_email = "info@lonius.co.le"
 app_license = "MIT"
-
+app_logo_url = "/files/tiberbu_logo (1).png"
 # Includes in <head>
 # ------------------
 
@@ -97,7 +97,9 @@ after_migrate =["client_registry.execute"]
 
 doc_events = {
 	"Client Registry": {
-		"before_save": ["client_registry.api.hie_registry.update_dependants","client_registry.api.hie_registry.update_full_name"],
+		# "before_save": ["client_registry.api.hie_registry.update_dependants","client_registry.api.hie_registry.update_full_name"],
+		"before_save": ["client_registry.api.hie_registry.update_full_name"],
+
 	}
 }
 
