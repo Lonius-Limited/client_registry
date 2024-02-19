@@ -11,6 +11,8 @@ class ClientRegistry(Document):
 		self.check_duplicate_ids()
 		self.to_fhir()
 		# pass
+	def check_duplicate_ids(self):
+		pass
 	def generate_hash(self):
 		# if not self.get("related_to"):
 		secret = "{}:{}".format(self.last_name,self.date_of_birth)
