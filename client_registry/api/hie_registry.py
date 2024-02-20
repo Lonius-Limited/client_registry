@@ -1,6 +1,8 @@
 import frappe
 import json
 import jwt
+import string, random
+N=4
 # import numpy as np
 
 @frappe.whitelist()
@@ -22,6 +24,27 @@ def client_lookup(payload, page_length=5):
 	for record in records:
 		doc = frappe.get_doc("Client Registry", record.get("name"))
 		result.append(doc.to_fhir())
+	return dict(total=len(result), result=result)
+@frappe.whitelist()
+def client_nrb_lookup(payload, page_length=5):
+	result = []
+	if isinstance(payload, str):
+		payload =json.loads(payload)
+	or_filters = payload
+	filters_from_user =  list(dict.fromkeys(or_filters))
+	if(len(filters_from_user)<1): return dict(status="error",description="Search filters not provided")
+	if "id" in filters_from_user:
+		or_filters["name"] = payload.pop("id")
+	# return frappe.get_all("Client Registry", or_filters=or_filters, fields=["first_name","middle_name","last_name","full_name","gender","date_of_birth","identification_type","identification_number","is_alive","deceased_datetime","phone","email","country","county","sub_county","ward","village","related_to","related_to_full_name"])
+	records = frappe.get_all("NRB Record",filters=or_filters, page_length=page_length)
+	# return []
+	# if not records:
+	# 	arg_keys = list(dict.fromkeys(payload))
+	# 	if "identification_type" in arg_keys and "identification_number" in arg_keys:
+	# 		records = fetch_based_on_other_identifiers(dict(identification_type=payload.get("identification_type"), identification_number=payload.get("identification_number")))
+	# for record in records:
+	# 	doc = frappe.get_doc("NRB Record", record.get("name"))
+	# 	result.append(doc.to_fhir())
 	return dict(total=len(result), result=result)
 @frappe.whitelist()
 def create_client(payload):
@@ -126,7 +149,26 @@ def _test_manually_add_dependants():
 	to_update=dict(id="CR00000001", dependants=dependants)
 	print("Sending,===>", to_update)
 	update_client(to_update)
-	
+@frappe.whitelist()
+def send_otp(*args, **kwargs):
+	payload =  kwargs
+	phone = payload.get("phone")
+	otp = ''.join(random.choices(string.ascii_uppercase + string.digits, k=N))
+	args = dict(doctype="OTP Record",key=otp, valid=1,phone=phone)
+	doc = frappe.get_doc(args).save(ignore_permissions=True)
+	frappe.db.commit()
+	return dict(otp_record=doc.get("name"))
+@frappe.whitelist()
+def validate_otp(*args, **kwargs):
+	payload = kwargs
+	otp_record  = payload.get("otp_record")
+	otp = payload.get("otp")
+	record = frappe.get_doc("OTP Record", otp_record)
+	if not record.get("valid"): return dict(status="error", error_message="The token you provided is already used.")
+	if not record.get("key")==otp.upper(): return dict(status="error", error_message="The token you provided is invalid or used")
+	record.db_set("valid",0, commit=True, update_modified=True)
+	record.save(ignore_permissions=1)
+	return dict(status="Valid")
 	
 	
 
