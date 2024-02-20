@@ -1,15 +1,18 @@
 import frappe
 import json
 import jwt
-import string, random
+import string, random, requests
 N=4
+
 # import numpy as np
 
 @frappe.whitelist()
 def client_lookup(payload, page_length=5):
+	# payload = kwargs
 	result = []
 	if isinstance(payload, str):
 		payload =json.loads(payload)
+	# page_length = payload.pop("page_length", 5)
 	or_filters = payload
 	filters_from_user =  list(dict.fromkeys(or_filters))
 	if(len(filters_from_user)<1): return dict(status="error",description="Search filters not provided")
@@ -153,7 +156,7 @@ def _test_manually_add_dependants():
 def send_otp(*args, **kwargs):
 	payload =  kwargs
 	phone = payload.get("phone")
-	otp = ''.join(random.choices(string.ascii_uppercase + string.digits, k=N))
+	otp = ''.join(random.choices(string.digits, k=N))
 	args = dict(doctype="OTP Record",key=otp, valid=1,phone=phone)
 	doc = frappe.get_doc(args).save(ignore_permissions=True)
 	frappe.db.commit()
@@ -169,6 +172,13 @@ def validate_otp(*args, **kwargs):
 	record.db_set("valid",0, commit=True, update_modified=True)
 	record.save(ignore_permissions=1)
 	return dict(status="Valid")
+@frappe.whitelist()
+def nrb_by_id(*args, **kwargs):
+    payload = kwargs
+    id = payload["identification_number"]
+    url = "https://neaims.go.ke/genapi/api/IPRS/GetPersonByID/{}".format(id)
+    response = requests.get(url).json()
+    return response
 	
 	
 

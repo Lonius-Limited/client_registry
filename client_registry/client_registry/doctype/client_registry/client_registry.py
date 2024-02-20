@@ -37,7 +37,8 @@ class ClientRegistry(Document):
 		pass
 	def generate_hash(self):
 		if self.get("related_to"): return
-		secret = "{}".format(self.date_of_birth)
+		# secret = "{}".format(self.date_of_birth)
+		secret = "{}".format(frappe.db.get_single_value("Client Registry Settings","security_hash"))
 		id_payload = dict(identity="{}:{}".format(self.get("identification_type").lower(), self.get("identification_number").lower()).replace(" ","_"))
 		encoded_jwt = jwt.encode(id_payload, secret , algorithm="HS256")
 		self.id_hash = encoded_jwt[:140]
@@ -57,15 +58,19 @@ class ClientRegistry(Document):
 				"system": "{}".format(doc.get("registry_system")),
 				"facility_code": "{}".format(doc.get("facility_code"))
 			},
+			"title": doc.get("title") or "",
 			"first_name": doc.get("first_name"),
 			"middle_name": doc.get("middle_name") or "",
 			"last_name": doc.get("last_name") or "",
-			"gender": doc.get("gender"),
+			"gender": doc.get("gender") or "",
 			"date_of_birth": doc.get("date_of_birth"),
-			"nationality": doc.get("nationality"),
+   			"place_of_birth": doc.get("place_of_birth") or "",
+			"person_with_disability": doc.get("person_with_disability"),
+			"citizenship": doc.get("citizenship") or "",
 			"kra_pin": self.get("kra_pin") or "",
 			"preferred_primary_care_network": self.get("preferred_primary_care_network") or "",
-   			"marital_status": doc.get("marital_status"),
+			"employment_type": doc.get("employment_type") or "",
+   			"civil_status": doc.get("civil_status") or "",
 			"identification_type": doc.get("identification_type"),
 			"identification_number": doc.get("identification_number"),
 			"other_identifications": self._other_identifications(),
@@ -80,11 +85,16 @@ class ClientRegistry(Document):
 			"county": doc.get("country") or "",
 			"sub_county": doc.get("sub_county") or "",
 			"ward": doc.get("ward") or "",
-			"village": doc.get("village") or "",
+			"village_estate": doc.get("village_estate") or "",
+			"building_house_no": doc.get("building_house_no") or "",
+			"latitude": doc.get("latitude") or "",
+			"longitude": doc.get("longitude") or "",
+			"province_state_country": doc.get("province_state_country") or "",
+			"zip_code": doc.get("zip_code") or "",
 			# "related_to": doc.get("related_to") or "",
 			# "related_to_full_name": doc.get("related_to_full_name") or "",
 			# "relationship": doc.get("relationship") or "",
-			"id_hash": doc.get("full_hash")
+			# "id_hash": doc.get("full_hash")
 
 	
 		}
