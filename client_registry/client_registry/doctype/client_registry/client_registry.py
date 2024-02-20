@@ -36,11 +36,13 @@ class ClientRegistry(Document):
 	def check_duplicate_ids(self):
 		pass
 	def generate_hash(self):
+		wt_secret = frappe.db.get_single_value("Client Registry Settings","security_hash")
+		if not wt_secret: frappe.throw("Error: Critical security configuration is missing. Please contact the System Administrator")
 		if self.get("related_to"): return
 		# secret = "{}".format(self.date_of_birth)
-		secret = "{}".format(frappe.db.get_single_value("Client Registry Settings","security_hash"))
+		# secret = "{}".format(frappe.db.get_single_value("Client Registry Settings","security_hash"))
 		id_payload = dict(identity="{}:{}".format(self.get("identification_type").lower(), self.get("identification_number").lower()).replace(" ","_"))
-		encoded_jwt = jwt.encode(id_payload, secret , algorithm="HS256")
+		encoded_jwt = jwt.encode(id_payload, wt_secret , algorithm="HS256")
 		self.id_hash = encoded_jwt[:140]
 		self.full_hash = encoded_jwt
 	def to_fhir(self):
