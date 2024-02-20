@@ -1,0 +1,61 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-02-20 09:23:11.331377",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "africastalking_settings_section",
+  "africastalking_sms_api",
+  "jwt_security",
+  "security_hash"
+ ],
+ "fields": [
+  {
+   "fieldname": "africastalking_settings_section",
+   "fieldtype": "Section Break",
+   "label": "AfricasTalking Settings"
+  },
+  {
+   "fieldname": "africastalking_sms_api",
+   "fieldtype": "Data",
+   "label": "AfricasTalking SMS API"
+  },
+  {
+   "fieldname": "jwt_security",
+   "fieldtype": "Section Break",
+   "label": "JWT Security"
+  },
+  {
+   "fieldname": "security_hash",
+   "fieldtype": "Data",
+   "label": "Security Hash"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-02-20 13:32:28.145142",
+ "modified_by": "Administrator",
+ "module": "Client Registry",
+ "name": "Client Registry Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

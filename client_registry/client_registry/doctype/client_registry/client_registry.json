@@ -6,23 +6,27 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "title",
   "first_name",
   "middle_name",
   "last_name",
   "full_name",
   "kra_pin",
   "preferred_primary_care_network",
-  "demographics",
   "column_break_5",
+  "person_with_disability",
   "gender",
   "date_of_birth",
-  "marital_status",
-  "nationality",
+  "civil_status",
+  "place_of_birth",
+  "citizenship",
   "identifiers_section",
   "identification_type",
   "biometrics_verified",
   "column_break_47bdy",
   "identification_number",
+  "employment_details_section",
+  "employment_type",
   "other_ids_section",
   "other_identification_docs",
   "column_break_14",
@@ -31,13 +35,20 @@
   "is_alive",
   "deceased_datetime",
   "current_address_contacts_and_residence_tab",
+  "postal_address",
   "phone",
   "email",
   "country",
   "county",
   "sub_county",
   "ward",
-  "village",
+  "village_estate",
+  "building_house_no",
+  "foreign_nationals_section",
+  "province_state_country",
+  "zip_code",
+  "latitude",
+  "longitude",
   "patient_relation_tab",
   "related_to",
   "relationship",
@@ -52,11 +63,6 @@
   "full_hash"
  ],
  "fields": [
-  {
-   "fieldname": "demographics",
-   "fieldtype": "Data",
-   "label": "Demographics"
-  },
   {
    "fieldname": "first_name",
    "fieldtype": "Data",
@@ -177,11 +183,6 @@
    "options": "Residence"
   },
   {
-   "fieldname": "village",
-   "fieldtype": "Data",
-   "label": "Village"
-  },
-  {
    "fieldname": "full_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -234,16 +235,9 @@
    "options": "\nSpouse\nMother\nFather\nSon\nDaughter\nNuclear Family"
   },
   {
-   "fieldname": "marital_status",
-   "fieldtype": "Select",
-   "label": "Civil Status",
-   "options": "\nSingle\nMarried\nDivorced\nWidowed"
-  },
-  {
    "fieldname": "facility_code",
    "fieldtype": "Data",
-   "label": "Facility Code",
-   "reqd": 1
+   "label": "Facility Code"
   },
   {
    "fieldname": "unique_patient_identifier",
@@ -264,12 +258,6 @@
    "fieldname": "other_ids_section",
    "fieldtype": "Section Break",
    "label": "Other Ids"
-  },
-  {
-   "fieldname": "nationality",
-   "fieldtype": "Link",
-   "label": "Nationality",
-   "options": "Nationality"
   },
   {
    "fieldname": "full_hash",
@@ -299,11 +287,93 @@
    "fieldname": "preferred_primary_care_network",
    "fieldtype": "Data",
    "label": "Preferred Primary Care Network"
+  },
+  {
+   "fieldname": "employment_details_section",
+   "fieldtype": "Section Break",
+   "label": "Employment Details"
+  },
+  {
+   "fieldname": "employment_type",
+   "fieldtype": "Select",
+   "label": "Employment Type",
+   "options": "\nEmployed\nSelf-Employed\nSponsored\nOrganised Group",
+   "reqd": 1
+  },
+  {
+   "fieldname": "citizenship",
+   "fieldtype": "Select",
+   "label": "Citizenship",
+   "options": "\nKENYAN\nFOREIGN NATIONAL\nRESIDENT",
+   "reqd": 1
+  },
+  {
+   "fieldname": "civil_status",
+   "fieldtype": "Select",
+   "label": "Civil Status",
+   "options": "\nSingle\nMarried\nDivorced\nWidower\nWidow\nSeparated"
+  },
+  {
+   "fieldname": "place_of_birth",
+   "fieldtype": "Data",
+   "label": "Place Of Birth"
+  },
+  {
+   "fieldname": "postal_address",
+   "fieldtype": "Long Text",
+   "label": "Postal Address"
+  },
+  {
+   "fieldname": "foreign_nationals_section",
+   "fieldtype": "Section Break",
+   "label": "Foreign Nationals"
+  },
+  {
+   "fieldname": "province_state_country",
+   "fieldtype": "Data",
+   "label": "Province/State/Country"
+  },
+  {
+   "fieldname": "zip_code",
+   "fieldtype": "Data",
+   "label": "Zip Code"
+  },
+  {
+   "default": "0",
+   "fieldname": "person_with_disability",
+   "fieldtype": "Check",
+   "label": "Person With Disability?",
+   "options": "\n"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title"
+  },
+  {
+   "fieldname": "village_estate",
+   "fieldtype": "Data",
+   "label": "Village/Estate"
+  },
+  {
+   "fieldname": "building_house_no",
+   "fieldtype": "Data",
+   "label": "Building / House No"
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Geolocation",
+   "label": "Latitude"
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Geolocation",
+   "label": "Longitude"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-20 04:33:29.648510",
+ "modified": "2024-02-20 13:18:51.216803",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry",

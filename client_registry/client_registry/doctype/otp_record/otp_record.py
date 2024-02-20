@@ -7,7 +7,7 @@ from frappe.model.document import Document
 
 africastalking.initialize(
 username='clientcr',
-api_key='421a7e42e07e312613ef30f1316b62615cb9ea5eb4aadcd47f955686d568a53a')
+api_key=frappe.db.get_single_value("Client Registry Settings","africastalking_sms_api"))
 sms = africastalking.SMS
 
 class OTPRecord(Document):
