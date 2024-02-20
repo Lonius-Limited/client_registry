@@ -1,7 +1,8 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2022-10-17 10:08:18.764886",
+ "creation": "2024-02-20 03:58:47.272480",
+ "default_view": "List",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -10,8 +11,6 @@
   "middle_name",
   "last_name",
   "full_name",
-  "kra_pin",
-  "preferred_primary_care_network",
   "demographics",
   "column_break_5",
   "gender",
@@ -20,7 +19,6 @@
   "nationality",
   "identifiers_section",
   "identification_type",
-  "biometrics_verified",
   "column_break_47bdy",
   "identification_number",
   "other_ids_section",
@@ -53,11 +51,6 @@
  ],
  "fields": [
   {
-   "fieldname": "demographics",
-   "fieldtype": "Data",
-   "label": "Demographics"
-  },
-  {
    "fieldname": "first_name",
    "fieldtype": "Data",
    "label": "First Name",
@@ -73,6 +66,18 @@
    "fieldtype": "Data",
    "label": "Last Name",
    "reqd": 1
+  },
+  {
+   "fieldname": "full_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Full Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "demographics",
+   "fieldtype": "Data",
+   "label": "Demographics"
   },
   {
    "fieldname": "column_break_5",
@@ -92,31 +97,21 @@
    "reqd": 1
   },
   {
-   "fieldname": "phone",
-   "fieldtype": "Data",
-   "label": "Phone"
+   "fieldname": "marital_status",
+   "fieldtype": "Select",
+   "label": "Civil Status",
+   "options": "\nSingle\nMarried\nDivorced\nWidowed"
   },
   {
-   "fieldname": "email",
-   "fieldtype": "Data",
-   "label": "Email"
+   "fieldname": "nationality",
+   "fieldtype": "Link",
+   "label": "Nationality",
+   "options": "Nationality"
   },
   {
    "fieldname": "identifiers_section",
    "fieldtype": "Section Break",
    "label": "Primary Identifiers"
-  },
-  {
-   "fieldname": "identification_number",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Identification Number",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_14",
-   "fieldtype": "Tab Break",
-   "label": "Next of Kin (Dependants)"
   },
   {
    "fieldname": "identification_type",
@@ -126,21 +121,48 @@
    "reqd": 1
   },
   {
+   "fieldname": "column_break_47bdy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "identification_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Identification Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "other_ids_section",
+   "fieldtype": "Section Break",
+   "label": "Other Ids"
+  },
+  {
+   "fieldname": "other_identification_docs",
+   "fieldtype": "Table",
+   "label": "Other Identification Docs",
+   "options": "Client Identifier"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Tab Break",
+   "label": "Next of Kin (Dependants)"
+  },
+  {
    "fieldname": "dependants",
    "fieldtype": "Table",
    "label": "Dependants",
    "options": "Dependants"
   },
   {
+   "fieldname": "deceasedstatus_tab",
+   "fieldtype": "Tab Break",
+   "label": "Deceased Status"
+  },
+  {
    "default": "1",
    "fieldname": "is_alive",
    "fieldtype": "Check",
    "label": "Is Alive"
-  },
-  {
-   "fieldname": "deceasedstatus_tab",
-   "fieldtype": "Tab Break",
-   "label": "Deceased Status"
   },
   {
    "fieldname": "deceased_datetime",
@@ -151,6 +173,16 @@
    "fieldname": "current_address_contacts_and_residence_tab",
    "fieldtype": "Tab Break",
    "label": "Current Address, Contacts and Residence"
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "label": "Phone"
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email"
   },
   {
    "fieldname": "country",
@@ -182,13 +214,6 @@
    "label": "Village"
   },
   {
-   "fieldname": "full_name",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Full Name",
-   "read_only": 1
-  },
-  {
    "fieldname": "patient_relation_tab",
    "fieldtype": "Tab Break",
    "label": "Patient Relation"
@@ -198,6 +223,12 @@
    "fieldtype": "Link",
    "label": "Related To",
    "options": "Client Registry"
+  },
+  {
+   "fieldname": "relationship",
+   "fieldtype": "Select",
+   "label": "Relationship",
+   "options": "\nSpouse\nMother\nFather\nSon\nDaughter\nNuclear Family"
   },
   {
    "fetch_from": "related_to.full_name",
@@ -221,29 +252,17 @@
    "label": "Record ID"
   },
   {
+   "fieldname": "facility_code",
+   "fieldtype": "Data",
+   "label": "Facility Code",
+   "reqd": 1
+  },
+  {
    "fieldname": "id_hash",
    "fieldtype": "Data",
    "label": "ID Hash",
    "read_only": 1,
    "unique": 1
-  },
-  {
-   "fieldname": "relationship",
-   "fieldtype": "Select",
-   "label": "Relationship",
-   "options": "\nSpouse\nMother\nFather\nSon\nDaughter\nNuclear Family"
-  },
-  {
-   "fieldname": "marital_status",
-   "fieldtype": "Select",
-   "label": "Civil Status",
-   "options": "\nSingle\nMarried\nDivorced\nWidowed"
-  },
-  {
-   "fieldname": "facility_code",
-   "fieldtype": "Data",
-   "label": "Facility Code",
-   "reqd": 1
   },
   {
    "fieldname": "unique_patient_identifier",
@@ -257,56 +276,18 @@
    "label": "Check Digit"
   },
   {
-   "fieldname": "column_break_47bdy",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "other_ids_section",
-   "fieldtype": "Section Break",
-   "label": "Other Ids"
-  },
-  {
-   "fieldname": "nationality",
-   "fieldtype": "Link",
-   "label": "Nationality",
-   "options": "Nationality"
-  },
-  {
    "fieldname": "full_hash",
    "fieldtype": "Long Text",
    "label": "Full Hash",
    "read_only": 1
-  },
-  {
-   "fieldname": "other_identification_docs",
-   "fieldtype": "Table",
-   "label": "Other Identification Docs",
-   "options": "Client Identifier"
-  },
-  {
-   "default": "0",
-   "description": "Checks whether a client has their biometric information verified.",
-   "fieldname": "biometrics_verified",
-   "fieldtype": "Check",
-   "label": "Biometrics Verified?"
-  },
-  {
-   "fieldname": "kra_pin",
-   "fieldtype": "Data",
-   "label": "KRA PIN"
-  },
-  {
-   "fieldname": "preferred_primary_care_network",
-   "fieldtype": "Data",
-   "label": "Preferred Primary Care Network"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-20 04:33:29.648510",
+ "modified": "2024-02-20 03:58:47.272480",
  "modified_by": "Administrator",
  "module": "Client Registry",
- "name": "Client Registry",
+ "name": "NRB Record",
  "owner": "Administrator",
  "permissions": [
   {
