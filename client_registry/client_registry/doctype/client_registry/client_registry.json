@@ -160,27 +160,23 @@
   },
   {
    "fieldname": "country",
-   "fieldtype": "Link",
-   "label": "Country",
-   "options": "Residence"
+   "fieldtype": "Data",
+   "label": "Country"
   },
   {
    "fieldname": "county",
-   "fieldtype": "Link",
-   "label": "County",
-   "options": "Residence"
+   "fieldtype": "Data",
+   "label": "County"
   },
   {
    "fieldname": "sub_county",
-   "fieldtype": "Link",
-   "label": "Sub County",
-   "options": "Residence"
+   "fieldtype": "Data",
+   "label": "Sub County"
   },
   {
    "fieldname": "ward",
-   "fieldtype": "Link",
-   "label": "Ward",
-   "options": "Residence"
+   "fieldtype": "Data",
+   "label": "Ward"
   },
   {
    "fieldname": "full_name",
@@ -373,7 +369,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-20 13:18:51.216803",
+ "modified": "2024-02-20 19:04:32.626382",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry",

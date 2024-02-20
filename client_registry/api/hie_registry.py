@@ -2,10 +2,10 @@ import frappe
 import json
 import jwt
 import string, random, requests
+from datetime import datetime
 N=4
 
 # import numpy as np
-
 @frappe.whitelist()
 def client_lookup(payload, page_length=5):
 	# payload = kwargs
@@ -28,6 +28,103 @@ def client_lookup(payload, page_length=5):
 		doc = frappe.get_doc("Client Registry", record.get("name"))
 		result.append(doc.to_fhir())
 	return dict(total=len(result), result=result)
+@frappe.whitelist()
+def client_lookup_nrb_search(payload, page_length=5):
+	# payload = kwargs
+	result = []
+	if isinstance(payload, str):
+		payload =json.loads(payload)
+	# page_length = payload.pop("page_length", 5)
+	or_filters = payload
+	filters_from_user =  list(dict.fromkeys(or_filters))
+	if(len(filters_from_user)<1): return dict(status="error",description="Search filters not provided")
+	if "id" in filters_from_user:
+		or_filters["name"] = payload.pop("id")
+	# return frappe.get_all("Client Registry", or_filters=or_filters, fields=["first_name","middle_name","last_name","full_name","gender","date_of_birth","identification_type","identification_number","is_alive","deceased_datetime","phone","email","country","county","sub_county","ward","village","related_to","related_to_full_name"])
+	records = frappe.get_all("Client Registry",filters=or_filters, page_length=page_length)
+	if not records:
+		arg_keys = list(dict.fromkeys(payload))
+		if "identification_type" in arg_keys and "identification_number" in arg_keys:
+			records = fetch_based_on_other_identifiers(dict(identification_type=payload.get("identification_type"), identification_number=payload.get("identification_number")))
+	for record in records:
+		doc = frappe.get_doc("Client Registry", record.get("name"))
+		result.append(doc.to_fhir())
+	if (len(result)<1): return fetch_and_post_from_nrb(payload)
+	return dict(total=len(result), result=result)
+def fetch_and_post_from_nrb(payload):
+	nrb_data = nrb_by_id(identification_number=payload.get("identification_number"))
+	if not nrb_data: return dict(total=0, result=[])
+	if nrb_data.get("ErrorCode"): return dict(total=0, result=[])
+	gender = "Female"
+	if nrb_data.get("Gender") == "M" : gender ="Male"
+	date_string = nrb_data.get("Date_of_Birth").split(" ")[0] 
+	date_format = "%m/%d/%Y"
+	dob = datetime.strptime(date_string, date_format)
+	try:
+		args = dict(
+			doctype="Client Registry",
+			first_name = nrb_data.get("First_Name"),
+			last_name = nrb_data.get("Surname"),
+			middle_name = nrb_data.get("Other_Name") or "",
+			gender = gender,
+			date_of_birth = dob,
+			# civil_status = nrb_data.get(""),
+			identification_type = payload.get("identification_type"),
+			identification_number = payload.get("identification_number"),
+			citizenship = nrb_data.get("Citizenship").upper(),
+			place_of_birth = nrb_data.get("Place_of_Birth"),
+			# first_name = nrb_data.get(""),
+			# kra_pin = nrb_data.get(""),
+			# preferred_primary_care_network = nrb_data.get(""),
+			# county = nrb_data.get(""),
+			# sub_county = nrb_data.get(""),
+		)
+		doc = frappe.get_doc(args).insert(ignore_permissions=1, ignore_mandatory=1)
+		
+		frappe.db.commit()
+	except Exception as e:
+		frappe.db.rollback()
+		frappe.throw("{}".format(e))
+		
+	return doc.to_fhir()
+	
+#     {
+# 	message: {
+# 	ErrorCode: "",
+# 	ErrorMessage: "",
+# 	ErrorOcurred: false,
+# 	Citizenship: "Kenyan",
+# 	Clan: "KIPYEGEN",
+# 	Date_of_Birth: "2/5/1982 12:00:00 AM",
+# 	Date_of_Death: null,
+# 	Ethnic_Group: "KALENJIN",
+# 	Family: null,
+# 	Fingerprint: null,
+# 	First_Name: "THOMAS",
+# 	Gender: "M",
+# 	ID_Number: "22334289",
+# 	Occupation: null,
+# 	Other_Name: "SANG",
+# 	Photo: null,
+# 	Pin: null,
+# 	Place_of_Birth: "NANDI
+# 	DISTRICT - NANDI
+# 	",
+# 	Place_of_Death: null,
+# 	Place_of_Live: "P O BOX 150 KABIYET
+# 	KIBIGORE
+# 	KEBULONIK
+# 	LOCATION - KEBULONIK
+# 	DIVISION - KABIYET
+# 	DISTRICT - NANDI NORTH
+# 	",
+# 	Signature: null,
+# 	Surname: "MWOGI",
+# 	Date_of_Issue: null,
+# 	RegOffice: null,
+# 	Serial_Number: "704010073"
+# 	}
+# }
 @frappe.whitelist()
 def client_nrb_lookup(payload, page_length=5):
 	result = []
@@ -174,12 +271,49 @@ def validate_otp(*args, **kwargs):
 	return dict(status="Valid")
 @frappe.whitelist()
 def nrb_by_id(*args, **kwargs):
-    payload = kwargs
-    id = payload["identification_number"]
-    url = "https://neaims.go.ke/genapi/api/IPRS/GetPersonByID/{}".format(id)
-    response = requests.get(url).json()
-    return response
-	
+	payload = kwargs
+	id = payload["identification_number"]
+	url = "https://neaims.go.ke/genapi/api/IPRS/GetPersonByID/{}".format(id)
+	response = requests.get(url).json()
+	return response
+
+# {
+# 	message: {
+# 	ErrorCode: "",
+# 	ErrorMessage: "",
+# 	ErrorOcurred: false,
+# 	Citizenship: "Kenyan",
+# 	Clan: "KIPYEGEN",
+# 	Date_of_Birth: "2/5/1982 12:00:00 AM",
+# 	Date_of_Death: null,
+# 	Ethnic_Group: "KALENJIN",
+# 	Family: null,
+# 	Fingerprint: null,
+# 	First_Name: "THOMAS",
+# 	Gender: "M",
+# 	ID_Number: "22334289",
+# 	Occupation: null,
+# 	Other_Name: "SANG",
+# 	Photo: null,
+# 	Pin: null,
+# 	Place_of_Birth: "NANDI
+# 	DISTRICT - NANDI
+# 	",
+# 	Place_of_Death: null,
+# 	Place_of_Live: "P O BOX 150 KABIYET
+# 	KIBIGORE
+# 	KEBULONIK
+# 	LOCATION - KEBULONIK
+# 	DIVISION - KABIYET
+# 	DISTRICT - NANDI NORTH
+# 	",
+# 	Signature: null,
+# 	Surname: "MWOGI",
+# 	Date_of_Issue: null,
+# 	RegOffice: null,
+# 	Serial_Number: "704010073"
+# 	}
+# }
 	
 
 	  
