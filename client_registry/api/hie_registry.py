@@ -1,18 +1,11 @@
 import frappe
 import json
-import jwt,boto3
+import jwt
 import string, random, requests
 from datetime import datetime
 
 import urllib
-AWS_SETTINGS = frappe.get_doc("S3 File Attachment")
-_TEXTRACT_CLIENT = boto3.client(
-	'textract',
-	aws_access_key_id=AWS_SETTINGS.get("aws_key"), #"AKIA32YODOUACJE7K2VK",
-	aws_secret_access_key=AWS_SETTINGS.get("aws_secret"), # "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",
-	# aws_session_token=SESSION_TOKEN
-	region_name=AWS_SETTINGS.get("region_name") #"eu-west-1"
-)
+
 N=4
 
 # import numpy as np
@@ -315,11 +308,19 @@ def read_image(file_path):
 	return image_bytes
 @frappe.whitelist()
 def document_extract(filename=None, _file_bytes=None):	
+	import boto3
+	AWS_SETTINGS = frappe.get_doc("S3 File Attachment")
+	_TEXTRACT_CLIENT = boto3.client(
+		'textract',
+		aws_access_key_id=AWS_SETTINGS.get("aws_key"), #"",
+		aws_secret_access_key=AWS_SETTINGS.get("aws_secret"), # "",
+		# aws_session_token=SESSION_TOKEN
+		region_name=AWS_SETTINGS.get("region_name") #""
+	)
 	
 	randomfilename=''.join(random.choices( string.digits, k=10))
 	if filename:	# print(client.__dict__)
 		urllib.request.urlretrieve(filename, "{}.png".format(randomfilename))
-	# textract_wrapper = TextractWrapper()
 	file_bytes= _file_bytes or read_image("{}.png".format(randomfilename))
 	response = _TEXTRACT_CLIENT.detect_document_text(
 		Document=
