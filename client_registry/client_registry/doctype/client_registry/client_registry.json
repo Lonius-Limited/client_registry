@@ -60,7 +60,8 @@
   "id_hash",
   "unique_patient_identifier",
   "check_digit",
-  "full_hash"
+  "full_hash",
+  "pin_number"
  ],
  "fields": [
   {
@@ -365,11 +366,16 @@
    "fieldname": "longitude",
    "fieldtype": "Geolocation",
    "label": "Longitude"
+  },
+  {
+   "fieldname": "pin_number",
+   "fieldtype": "Password",
+   "label": "PIN Number"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-20 19:04:32.626382",
+ "modified": "2024-02-22 17:06:15.030367",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry",

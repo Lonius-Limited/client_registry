@@ -10,7 +10,8 @@
   "africastalking_settings_section",
   "africastalking_sms_api",
   "jwt_security",
-  "security_hash"
+  "security_hash",
+  "automatically_create_client_from_nrb"
  ],
  "fields": [
   {
@@ -32,12 +33,19 @@
    "fieldname": "security_hash",
    "fieldtype": "Data",
    "label": "Security Hash"
+  },
+  {
+   "default": "1",
+   "description": "If checked it creates a payload from NRB database.",
+   "fieldname": "automatically_create_client_from_nrb",
+   "fieldtype": "Check",
+   "label": "Automatically Create Client From NRB"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-02-20 13:32:28.145142",
+ "modified": "2024-02-22 11:40:16.570177",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry Settings",

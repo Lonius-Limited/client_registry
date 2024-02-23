@@ -1,9 +1,13 @@
 # Copyright (c) 2022, Lonius Limited and contributors
 # For license information, please see license.txt
 
-import frappe, jwt
+import frappe, jwt, random, string, africastalking
 from frappe.model.document import Document
-
+N = 4
+africastalking.initialize(
+username='clientcr',
+api_key=frappe.db.get_single_value("Client Registry Settings","africastalking_sms_api"))
+sms = africastalking.SMS
 class ClientRegistry(Document):
 	# def autoname(self):
 	# 	pass
@@ -38,13 +42,28 @@ class ClientRegistry(Document):
 	def generate_hash(self):
 		wt_secret = frappe.db.get_single_value("Client Registry Settings","security_hash")
 		if not wt_secret: frappe.throw("Error: Critical security configuration is missing. Please contact the System Administrator")
-		if self.get("related_to"): return
+		# if self.get("related_to"): return
 		# secret = "{}".format(self.date_of_birth)
 		# secret = "{}".format(frappe.db.get_single_value("Client Registry Settings","security_hash"))
 		id_payload = dict(identity="{}:{}".format(self.get("identification_type").lower(), self.get("identification_number").lower()).replace(" ","_"))
 		encoded_jwt = jwt.encode(id_payload, wt_secret , algorithm="HS256")
 		self.id_hash = encoded_jwt[:140]
 		self.full_hash = encoded_jwt
+	@frappe.whitelist()
+	def generate_pin(self, pin_number=None):
+		self.set("pin_number" , pin_number or ''.join(random.choices(string.digits, k=N)))
+		self.save(ignore_permissions=True)
+		frappe.db.commit()
+	@frappe.whitelist()
+	def client_pin(self):
+		print(self.get_password("pin_number"))
+		frappe.msgprint(self.get_password("pin_number"))
+	@frappe.whitelist()
+	def send_pin_to_phone(self):
+		phone = self.get("phone")
+		message =  "Dear {}. The PIN for your account is {}.".format(self.get("full_name"), self.get_password("pin_number"))
+		response = sms.send(message, [phone])
+		self.add_comment('Comment', text="{}".format(response))
 	def to_fhir(self):
 		doc = self
 		fhir = {
@@ -58,7 +77,7 @@ class ClientRegistry(Document):
 			},
 			"originSystem": {
 				"system": "{}".format(doc.get("registry_system")),
-				"facility_code": "{}".format(doc.get("facility_code"))
+				"record_id": "{}".format(doc.get("record_id"))
 			},
 			"title": doc.get("title") or "",
 			"first_name": doc.get("first_name"),
@@ -82,7 +101,6 @@ class ClientRegistry(Document):
 			"phone": doc.get("phone") or "",
    			"biometrics_verified": doc.get("biometrics_verified") or 0,
 			"email": doc.get("email") or "",
-			"nationality": doc.get("") or "",
 			"country": doc.get("country") or "",
 			"county": doc.get("country") or "",
 			"sub_county": doc.get("sub_county") or "",
@@ -103,21 +121,10 @@ class ClientRegistry(Document):
 		# frappe.msgprint("{}".format(fhir))
 		return fhir
 	def next_of_kins(self):
-	 
 		payload = self.get("dependants")
 		return list(map(lambda x: dict(linked_record=x.get("linked_record"), full_name="{} {}".format(x.get("first_name"), x.get("last_name")), relationship=x.get("relationship")) ,payload))
-		# dependants =[]
-		# if not payload : return dependants
-		# for d in payload:
-		# 	dependants.append(d.as_dict())
-		# return dependants
 	def _other_identifications(self):
 		payload = self.get("other_identification_docs")
-		# other_ids = []
-		# if not payload: return other_ids
-		# for id in payload:
-		# 	other_ids.append(id.as_dict())
-		# return other_ids # 
 		return list(map(lambda x: dict(identification_type=x.get("identification_type"), identification_number=x.get("identification_number")) ,payload))
 	def update_dependants(self):
 		if not self.get("related_to"): return
