@@ -1,8 +1,18 @@
 import frappe
 import json
-import jwt
+import jwt,boto3
 import string, random, requests
 from datetime import datetime
+
+import urllib
+AWS_SETTINGS = frappe.get_doc("S3 File Attachment")
+_TEXTRACT_CLIENT = boto3.client(
+	'textract',
+	aws_access_key_id=AWS_SETTINGS.get("aws_key"), #"AKIA32YODOUACJE7K2VK",
+	aws_secret_access_key=AWS_SETTINGS.get("aws_secret"), # "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",
+	# aws_session_token=SESSION_TOKEN
+	region_name=AWS_SETTINGS.get("region_name") #"eu-west-1"
+)
 N=4
 
 # import numpy as np
@@ -51,80 +61,62 @@ def client_lookup_nrb_search(payload, page_length=5):
 		result.append(doc.to_fhir())
 	if (len(result)<1): return fetch_and_post_from_nrb(payload)
 	return dict(total=len(result), result=result)
-def fetch_and_post_from_nrb(payload):
-	nrb_data = nrb_by_id(identification_number=payload.get("identification_number"))
-	if not nrb_data: return dict(total=0, result=[])
-	if nrb_data.get("ErrorCode"): return dict(total=0, result=[])
-	gender = "Female"
-	if nrb_data.get("Gender") == "M" : gender ="Male"
-	date_string = nrb_data.get("Date_of_Birth").split(" ")[0] 
-	date_format = "%m/%d/%Y"
-	dob = datetime.strptime(date_string, date_format)
-	try:
-		args = dict(
-			doctype="Client Registry",
-			first_name = nrb_data.get("First_Name"),
-			last_name = nrb_data.get("Surname"),
-			middle_name = nrb_data.get("Other_Name") or "",
-			gender = gender,
-			date_of_birth = dob,
-			# civil_status = nrb_data.get(""),
-			identification_type = payload.get("identification_type"),
-			identification_number = payload.get("identification_number"),
-			citizenship = nrb_data.get("Citizenship").upper(),
-			place_of_birth = nrb_data.get("Place_of_Birth"),
-			# first_name = nrb_data.get(""),
-			# kra_pin = nrb_data.get(""),
-			# preferred_primary_care_network = nrb_data.get(""),
-			# county = nrb_data.get(""),
-			# sub_county = nrb_data.get(""),
-		)
-		doc = frappe.get_doc(args).insert(ignore_permissions=1, ignore_mandatory=1)
-		
-		frappe.db.commit()
-	except Exception as e:
-		frappe.db.rollback()
-		frappe.throw("{}".format(e))
-		
-	return doc.to_fhir()
+def fetch_and_post_from_nrb(payload, only_return_payload=1):
+	######
+	encoded_pin = payload.pop("encoded_pin", None)
+ 
+	if not encoded_pin: frappe.throw("Sorry, PIN is a required attribute to create a record in the client registry.")
 	
-#     {
-# 	message: {
-# 	ErrorCode: "",
-# 	ErrorMessage: "",
-# 	ErrorOcurred: false,
-# 	Citizenship: "Kenyan",
-# 	Clan: "KIPYEGEN",
-# 	Date_of_Birth: "2/5/1982 12:00:00 AM",
-# 	Date_of_Death: null,
-# 	Ethnic_Group: "KALENJIN",
-# 	Family: null,
-# 	Fingerprint: null,
-# 	First_Name: "THOMAS",
-# 	Gender: "M",
-# 	ID_Number: "22334289",
-# 	Occupation: null,
-# 	Other_Name: "SANG",
-# 	Photo: null,
-# 	Pin: null,
-# 	Place_of_Birth: "NANDI
-# 	DISTRICT - NANDI
-# 	",
-# 	Place_of_Death: null,
-# 	Place_of_Live: "P O BOX 150 KABIYET
-# 	KIBIGORE
-# 	KEBULONIK
-# 	LOCATION - KEBULONIK
-# 	DIVISION - KABIYET
-# 	DISTRICT - NANDI NORTH
-# 	",
-# 	Signature: null,
-# 	Surname: "MWOGI",
-# 	Date_of_Issue: null,
-# 	RegOffice: null,
-# 	Serial_Number: "704010073"
-# 	}
-# }
+	wt_secret = frappe.db.get_single_value("Client Registry Settings","security_hash")
+ 
+	if not wt_secret: frappe.throw("Error: Critical security configuration is missing. Please contact the System Administrator")
+	
+	pin_number = jwt.decode(encoded_pin, wt_secret, algorithms=["HS256"])["pin_number"]
+
+	##################
+	if payload.get("identification_type") :
+		nrb_data = nrb_by_id(identification_number=payload.get("identification_number"))
+		if not nrb_data: return dict(total=0, result=[])
+		if nrb_data.get("ErrorCode"): return dict(total=0, result=[])
+		if not frappe.db.get_single_value("Client Registry Settings","automatically_create_client_from_nrb"):
+			return dict(nrb_data=nrb_data)
+		gender = "Female"
+		if nrb_data.get("Gender") == "M" : gender ="Male"
+		date_string = nrb_data.get("Date_of_Birth").split(" ")[0] 
+		date_format = "%m/%d/%Y"
+		dob = datetime.strptime(date_string, date_format)
+		try:
+			args = dict(
+				doctype="Client Registry",
+				first_name = nrb_data.get("First_Name"),
+				last_name = nrb_data.get("Surname"),
+				middle_name = nrb_data.get("Other_Name") or "",
+				gender = gender,
+				date_of_birth = dob,
+				# civil_status = nrb_data.get(""),
+				identification_type = payload.get("identification_type"),
+				identification_number = payload.get("identification_number"),
+				citizenship = nrb_data.get("Citizenship").upper(),
+				place_of_birth = nrb_data.get("Place_of_Birth"),
+				pin_number = pin_number
+			)
+			doc = frappe.get_doc(args).insert(ignore_permissions=1, ignore_mandatory=1)
+			
+			# doc.set("pin_number",pin_number)
+			# doc.save()
+			frappe.db.commit()
+			doc.add_comment('Comment', text="{}".format(json.dumps(nrb_data)))
+			return doc.to_fhir()
+		except Exception as e:
+			frappe.db.rollback()
+			frappe.throw("{}".format(e))
+			
+		
+	else:
+		return dict(total=0, result=[])
+		
+	
+
 @frappe.whitelist()
 def client_nrb_lookup(payload, page_length=5):
 	result = []
@@ -151,33 +143,64 @@ def create_client(payload):
 	# return type(payload)
 	if isinstance(payload, str):
 		payload =json.loads(payload)
+	# pin_number = payload.pop("pin_number", None)
+	# if not pin_number: frappe.throw("Sorry, PIN is a required attribute to create a record in the client registry.")
 	payload["doctype"] ="Client Registry"
 	resource_type = payload.pop("resourceType")
 	identifiers =  payload.pop("originSystem")
 	payload["registry_system"] = identifiers.get("system") or ""
-	last_name = payload["last_name"]
-	date_of_birth = payload["date_of_birth"]
+	
 	payload["facility_code"] = identifiers.get("facility_code") or ""
-	secret = "{}:{}".format(last_name,date_of_birth)
 	other_ids = payload.pop("other_identifications", None)
-	# if not payload.get("related_to"):
-	# 	id_payload = dict(identity="{}:{}".format(payload.get("identification_type").lower(), payload.get("identification_number").lower()).replace(" ","_"))
-	# 	encoded_jwt = jwt.encode(id_payload, secret , algorithm="HS256")
-	# 	payload["id_hash"] = encoded_jwt[:140]
-	# 	payload["full_hash"] = encoded_jwt
 	doc = frappe.get_doc(payload)
 	if other_ids:
 		for id_obj in other_ids:
 			doc.append("other_identifications",id_obj)
 	doc.save()
-	# cd = doc.get_checkdigit(doc.get("name"))
-	# frappe.rename_doc('Client Registry', doc.get("name"), '{}-{}'.format(doc.get("name"),cd))
 	frappe.db.commit()
 	return doc.to_fhir()    
+
 @frappe.whitelist()
 def update_client(payload):#TBD
+	# client_pin = payload.get("pin_number", None)
+	# if not client_pin: frappe.throw("Please provide PIN number for this client inorder to update.")
 	doc = frappe.get_doc("Client Registry", payload.pop("id"))
+	# if doc.get_password("pin_number") != client_pin: frappe.throw("Invalid PIN, please reset and/or try again")
 	valid_keys = list(dict.fromkeys(doc.__dict__))
+	keys = [x for x in list(dict.fromkeys(payload)) if x in valid_keys] #Don't send bogus keys, we won't bother. Is it a good idea?
+	for k in keys:
+		doc.set(k, payload[k])
+	other_ids = payload.pop("other_identifications", None)
+	dependants = payload.pop("dependants", None)
+	doc.save()
+	if other_ids:
+		print("\nPreparing to enter ==> {} records".format(len(other_ids)))
+		for id_obj in other_ids:
+			doc.append("other_identification_docs",id_obj)
+		doc.save()
+		doc.reload()
+	if dependants:
+		update_dependants_manually(doc, dependants)
+		doc.reload()
+	frappe.db.commit()
+	return doc.to_fhir()
+@frappe.whitelist()
+def update_client_v2(payload):#TBD
+	encoded_pin = payload.get("encoded_pin", None)
+	if not encoded_pin: frappe.throw("Please provide PIN number for this client inorder to update.")
+ 
+	wt_secret = frappe.db.get_single_value("Client Registry Settings","security_hash")
+ 
+	if not wt_secret: frappe.throw("Error: Critical security configuration is missing. Please contact the System Administrator")
+	
+	pin_number = jwt.decode(encoded_pin, wt_secret, algorithms=["HS256"])["pin_number"]
+ 
+	doc = frappe.get_doc("Client Registry", payload.pop("id"))
+ 
+	if doc.get_password("pin_number") != pin_number: frappe.throw("Invalid PIN, please reset and/or try again")
+ 
+	valid_keys = list(dict.fromkeys(doc.__dict__))
+ 
 	keys = [x for x in list(dict.fromkeys(payload)) if x in valid_keys] #Don't send bogus keys, we won't bother. Is it a good idea?
 	for k in keys:
 		doc.set(k, payload[k])
@@ -197,7 +220,7 @@ def update_client(payload):#TBD
 	return doc.to_fhir()
 def validate_resource_type(resource):
 	if not resource.get("Patient"):
-		return dict(status="error",error_desc="Invalid resource")
+		return dict(status="error",error_desc="Invalid resource type")
 def update_dependants_manually(doc, dependants):
 	docname = doc.get("name")
 	filter_out_exists = list(filter(lambda x: not frappe.db.get_value("Dependants",dict(linked_record = x.get("id"), parent=docname), "name"),dependants))
@@ -265,7 +288,7 @@ def validate_otp(*args, **kwargs):
 	otp = payload.get("otp")
 	record = frappe.get_doc("OTP Record", otp_record)
 	if not record.get("valid"): return dict(status="error", error_message="The token you provided is already used.")
-	if not record.get("key")==otp.upper(): return dict(status="error", error_message="The token you provided is invalid or used")
+	if not record.get("key")==otp.upper(): return dict(status="error", error_message="The token you provided is invalid or used.")
 	record.db_set("valid",0, commit=True, update_modified=True)
 	record.save(ignore_permissions=1)
 	return dict(status="Valid")
@@ -276,44 +299,108 @@ def nrb_by_id(*args, **kwargs):
 	url = "https://neaims.go.ke/genapi/api/IPRS/GetPersonByID/{}".format(id)
 	response = requests.get(url).json()
 	return response
-
-# {
-# 	message: {
-# 	ErrorCode: "",
-# 	ErrorMessage: "",
-# 	ErrorOcurred: false,
-# 	Citizenship: "Kenyan",
-# 	Clan: "KIPYEGEN",
-# 	Date_of_Birth: "2/5/1982 12:00:00 AM",
-# 	Date_of_Death: null,
-# 	Ethnic_Group: "KALENJIN",
-# 	Family: null,
-# 	Fingerprint: null,
-# 	First_Name: "THOMAS",
-# 	Gender: "M",
-# 	ID_Number: "22334289",
-# 	Occupation: null,
-# 	Other_Name: "SANG",
-# 	Photo: null,
-# 	Pin: null,
-# 	Place_of_Birth: "NANDI
-# 	DISTRICT - NANDI
-# 	",
-# 	Place_of_Death: null,
-# 	Place_of_Live: "P O BOX 150 KABIYET
-# 	KIBIGORE
-# 	KEBULONIK
-# 	LOCATION - KEBULONIK
-# 	DIVISION - KABIYET
-# 	DISTRICT - NANDI NORTH
-# 	",
-# 	Signature: null,
-# 	Surname: "MWOGI",
-# 	Date_of_Issue: null,
-# 	RegOffice: null,
-# 	Serial_Number: "704010073"
-# 	}
-# }
+@frappe.whitelist()
+def reset_pin(*args, **kwargs):
+	wt_secret = frappe.db.get_single_value("Client Registry Settings","security_hash")
+	if not wt_secret: frappe.throw("Error: Critical security configuration is missing. Please contact the System Administrator")
+	payload = kwargs
+	id = payload["id"]
+	encoded_pin = payload["encoded_pin"]
+	pin = jwt.decode(encoded_pin, wt_secret, algorithms=["HS256"])["pin_number"]
+	doc = frappe.get_doc("Client Registry", id)
+	doc.generate_pin(pin_number=pin)
+def read_image(file_path):
+	with open(file_path, "rb") as file:
+		image_bytes = file.read()
+	return image_bytes
+@frappe.whitelist()
+def document_extract(filename=None, _file_bytes=None):	
 	
+	randomfilename=''.join(random.choices( string.digits, k=10))
+	if filename:	# print(client.__dict__)
+		urllib.request.urlretrieve(filename, "{}.png".format(randomfilename))
+	# textract_wrapper = TextractWrapper()
+	file_bytes= _file_bytes or read_image("{}.png".format(randomfilename))
+	response = _TEXTRACT_CLIENT.detect_document_text(
+		Document=
+			{
+				'Bytes':file_bytes,
+		
+			},
+		
+	)
+	import re
+	blocks = list(filter(lambda x: x.get("BlockType")=="LINE",response.get("Blocks")))
+	f = list(map(lambda x: x["Text"],blocks))
+	id = list(filter(lambda y: re.search("B0(.*?)F",y), f))
+	if not id: return ""
+	_match =  id[0]
+	return  dict(identification_number=re.search("B0(.*?)F",_match).group(1))
+	# id_regex =  re.search("^B0 & F$",y) #^B0[^BF]*F$
+ 	# print(response)
+	# return f, id
+def image_matching(filename1, filename2):
+	# return filename2, filename1
+	import face_recognition
 
-	  
+	picture_of_me = face_recognition.load_image_file(filename1)
+	my_face_encoding = face_recognition.face_encodings(picture_of_me)[0]
+
+	# my_face_encoding now contains a universal 'encoding' of my facial features that can be compared to any other picture of a face!
+
+	unknown_picture = face_recognition.load_image_file(filename2)
+	unknown_face_encoding = face_recognition.face_encodings(unknown_picture)[0]
+
+	# Now we can see the two face encodings are of the same person with `compare_faces`!
+
+	results = face_recognition.compare_faces([my_face_encoding], unknown_face_encoding)
+
+	return results[0]
+@frappe.whitelist(allow_guest=1)
+def extract_identification_number_from_id_scan():
+	files = frappe.request.files
+	# for file in files:
+	content = None
+	if 'file' in files:
+		file = files['file']
+		content = file.stream.read()
+		filename = file.filename
+
+	frappe.local.uploaded_file = content
+	frappe.local.uploaded_filename = filename
+	return document_extract(filename=None, _file_bytes=content)
+@frappe.whitelist(allow_guest=1)
+def match_images_from_upload():
+	files = frappe.request.files
+	
+ 
+	content = None
+	
+	urls_to_compare =[]
+	for fn in [files['filename1'], files['filename2']]:
+		content = fn.stream.read()
+		filename = fn.filename
+		ret = frappe.get_doc({
+				"doctype": "File",
+				# "attached_to_doctype": 'Job Applicant',#doctype,
+				# "attached_to_name": docname,
+				# "attached_to_field": fieldname,
+				# "folder": folder,
+				"file_name": filename,
+				# "file_url": file_url,
+				"is_private": 0,
+				"content": content
+			})
+		ret.save(ignore_permissions=True)
+		frappe.db.commit()
+		randomfilename=''.join(random.choices( string.digits, k=10))
+		urllib.request.urlretrieve(ret.get("file_url"),"{}.jpg".format(randomfilename))
+		urls_to_compare.append("{}.jpg".format(randomfilename))
+	
+	# return 
+
+	
+	return image_matching(urls_to_compare[0], urls_to_compare[1])
+	# frappe.local.uploaded_file = content
+	# frappe.local.uploaded_filename = filename
+	
