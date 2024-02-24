@@ -38,8 +38,10 @@ def client_lookup_nrb_search(payload, page_length=5):
 	if isinstance(payload, str):
 		payload =json.loads(payload)
 	# page_length = payload.pop("page_length", 5)
+	encoded_pin = payload.pop("encoded_pin", None)
 	or_filters = payload
 	filters_from_user =  list(dict.fromkeys(or_filters))
+	
 	if(len(filters_from_user)<1): return dict(status="error",description="Search filters not provided")
 	if "id" in filters_from_user:
 		or_filters["name"] = payload.pop("id")
@@ -48,16 +50,16 @@ def client_lookup_nrb_search(payload, page_length=5):
 	if not records:
 		arg_keys = list(dict.fromkeys(payload))
 		if "identification_type" in arg_keys and "identification_number" in arg_keys:
+			# records = fetch_based_on_other_identifiers(dict(identification_type=payload.get("identification_type"), identification_number=payload.get("identification_number"),))
 			records = fetch_based_on_other_identifiers(dict(identification_type=payload.get("identification_type"), identification_number=payload.get("identification_number")))
 	for record in records:
 		doc = frappe.get_doc("Client Registry", record.get("name"))
 		result.append(doc.to_fhir())
-	if (len(result)<1): return fetch_and_post_from_nrb(payload)
+	if (len(result)<1): return fetch_and_post_from_nrb(payload, encoded_pin)
 	return dict(total=len(result), result=result)
-def fetch_and_post_from_nrb(payload, only_return_payload=1):
+def fetch_and_post_from_nrb(payload, encoded_pin=None, only_return_payload=1):
 	######
-	encoded_pin = payload.pop("encoded_pin", None)
- 
+	
 	if not encoded_pin: frappe.throw("Sorry, PIN is a required attribute to create a record in the client registry.")
 	
 	wt_secret = frappe.db.get_single_value("Client Registry Settings","security_hash")
@@ -292,7 +294,7 @@ def nrb_by_id(*args, **kwargs):
 	url = "https://neaims.go.ke/genapi/api/IPRS/GetPersonByID/{}".format(id)
 	response = requests.get(url).json()
 	return response
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=1)
 def reset_pin(*args, **kwargs):
 	wt_secret = frappe.db.get_single_value("Client Registry Settings","security_hash")
 	if not wt_secret: frappe.throw("Error: Critical security configuration is missing. Please contact the System Administrator")
@@ -306,6 +308,19 @@ def read_image(file_path):
 	with open(file_path, "rb") as file:
 		image_bytes = file.read()
 	return image_bytes
+@frappe.whitelist(allow_guest=1)
+def image_comparison(filename1, filename2):
+    import boto3
+    AWS_SETTINGS = frappe.get_doc("S3 File Attachment")
+    _REKOGNITION_CLIENT = boto3.client(
+		'rekognition',
+		aws_access_key_id=AWS_SETTINGS.get("aws_key"), #"",
+		aws_secret_access_key=AWS_SETTINGS.get("aws_secret"), # "",
+		# aws_session_token=SESSION_TOKEN
+		region_name=AWS_SETTINGS.get("region_name") #""
+	)
+      
+    
 @frappe.whitelist()
 def document_extract(filename=None, _file_bytes=None):	
 	import boto3
@@ -314,7 +329,6 @@ def document_extract(filename=None, _file_bytes=None):
 		'textract',
 		aws_access_key_id=AWS_SETTINGS.get("aws_key"), #"",
 		aws_secret_access_key=AWS_SETTINGS.get("aws_secret"), # "",
-		# aws_session_token=SESSION_TOKEN
 		region_name=AWS_SETTINGS.get("region_name") #""
 	)
 	
@@ -342,21 +356,25 @@ def document_extract(filename=None, _file_bytes=None):
 	# return f, id
 def image_matching(filename1, filename2):
 	# return filename2, filename1
-	import face_recognition
+	try:
+		import face_recognition
 
-	picture_of_me = face_recognition.load_image_file(filename1)
-	my_face_encoding = face_recognition.face_encodings(picture_of_me)[0]
+		picture_of_me = face_recognition.load_image_file(filename1)
+		my_face_encoding = face_recognition.face_encodings(picture_of_me)[0]
 
-	# my_face_encoding now contains a universal 'encoding' of my facial features that can be compared to any other picture of a face!
+		# my_face_encoding now contains a universal 'encoding' of my facial features that can be compared to any other picture of a face!
 
-	unknown_picture = face_recognition.load_image_file(filename2)
-	unknown_face_encoding = face_recognition.face_encodings(unknown_picture)[0]
+		unknown_picture = face_recognition.load_image_file(filename2)
+		unknown_face_encoding = face_recognition.face_encodings(unknown_picture)[0]
 
-	# Now we can see the two face encodings are of the same person with `compare_faces`!
+		# Now we can see the two face encodings are of the same person with `compare_faces`!
 
-	results = face_recognition.compare_faces([my_face_encoding], unknown_face_encoding)
+		return my_face_encoding,unknown_face_encoding
+		results = face_recognition.compare_faces([my_face_encoding], unknown_face_encoding)
 
-	return results[0]
+		return results[0]
+	except Exception as e:
+		frappe.throw("{}".format(e))
 @frappe.whitelist(allow_guest=1)
 def extract_identification_number_from_id_scan():
 	files = frappe.request.files
