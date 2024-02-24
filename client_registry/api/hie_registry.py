@@ -58,6 +58,7 @@ def client_lookup_nrb_search(payload, page_length=5):
 	if (len(result)<1): return fetch_and_post_from_nrb(payload, encoded_pin)
 	return dict(total=len(result), result=result)
 def fetch_and_post_from_nrb(payload, encoded_pin=None, only_return_payload=1):
+	#
 	######
 	
 	if not encoded_pin: frappe.throw("Sorry, PIN is a required attribute to create a record in the client registry.")
@@ -152,9 +153,36 @@ def create_client(payload):
 		for id_obj in other_ids:
 			doc.append("other_identifications",id_obj)
 	doc.save()
+	# if 
 	frappe.db.commit()
-	return doc.to_fhir()    
+	return doc.to_fhir()
+@frappe.whitelist(allow_guest=1)    
+def face_biometric_validation():
+	files = frappe.request.files
+	id = frappe.form_dict.id
 
+	content = None
+	
+	urls_to_compare =[]
+	for fn in [files['selfie'], files['id_front']]:
+		content = fn.stream.read()
+		filename = fn.filename
+		ret = frappe.get_doc({
+				"doctype": "File",
+				"attached_to_doctype": 'Client Registry',#doctype,
+				"attached_to_name": id,
+				# "attached_to_field": fieldname,
+				# "folder": folder,
+				"file_name": filename,
+				# "file_url": file_url,
+				"is_private": 0,
+				"content": content
+			})
+		ret.save(ignore_permissions=True)
+		frappe.db.commit()
+		d = frappe.get_doc("File", ret.get("name"))
+		urls_to_compare.append(content)
+	return image_comparison_aws_rekognition(urls_to_compare)
 @frappe.whitelist()
 def update_client(payload):#TBD
 	# client_pin = payload.get("pin_number", None)
@@ -270,7 +298,11 @@ def _test_manually_add_dependants():
 @frappe.whitelist()
 def send_otp(*args, **kwargs):
 	payload =  kwargs
-	phone = payload.get("phone")
+	phone = ""
+	if  "identification_type" in list(dict.fromkeys(payload)):
+		phone = frappe.get_value("Client Registry",dict(identification_type=payload.get("identification_type"),identification_number=payload.get("identification_number")),"phone")
+	else:
+		phone = payload.get("phone")
 	otp = ''.join(random.choices(string.digits, k=N))
 	args = dict(doctype="OTP Record",key=otp, valid=1,phone=phone)
 	doc = frappe.get_doc(args).save(ignore_permissions=True)
@@ -309,18 +341,41 @@ def read_image(file_path):
 		image_bytes = file.read()
 	return image_bytes
 @frappe.whitelist(allow_guest=1)
-def image_comparison(filename1, filename2):
-    import boto3
-    AWS_SETTINGS = frappe.get_doc("S3 File Attachment")
-    _REKOGNITION_CLIENT = boto3.client(
+def image_comparison_aws_rekognition(files):#Array of two s3 sources
+	import boto3
+	import urllib.parse
+	import requests
+	sourceFile, targetFile = files[0] , files[1]
+	# return sourceFile, targetFile
+	AWS_SETTINGS = frappe.get_doc("S3 File Attachment")
+	_REKOGNITION_CLIENT = boto3.client(
 		'rekognition',
 		aws_access_key_id=AWS_SETTINGS.get("aws_key"), #"",
 		aws_secret_access_key=AWS_SETTINGS.get("aws_secret"), # "",
 		# aws_session_token=SESSION_TOKEN
 		region_name=AWS_SETTINGS.get("region_name") #""
 	)
-      
-    
+	bucket_name = AWS_SETTINGS.get("bucket_name")
+	# imageSource = open(requests.utils.requote_uri(sourceFile), 'rb')
+	# imageTarget = open(requests.utils.requote_uri(targetFile), 'rb')
+	imageSource = sourceFile
+	imageTarget = targetFile
+ 
+	# response = _REKOGNITION_CLIENT.compare_faces(SimilarityThreshold=90,
+	# 								SourceImage={"S3Object": {
+    #         "Bucket": bucket_name,
+    #         "Name": sourceFile.rpartition("/"[-1])[2]
+    #     }},
+	# 								TargetImage={"S3Object": {
+    #         "Bucket": bucket_name,
+    #         "Name": targetFile.rpartition("/"[-1])[2]
+    #     }}) 
+	# return type(imageTarget)
+
+	response = _REKOGNITION_CLIENT.compare_faces(SimilarityThreshold=90,
+									SourceImage={'Bytes': imageSource},
+									TargetImage={'Bytes': imageTarget}) 
+	return response
 @frappe.whitelist()
 def document_extract(filename=None, _file_bytes=None):	
 	import boto3
@@ -401,8 +456,8 @@ def match_images_from_upload():
 		filename = fn.filename
 		ret = frappe.get_doc({
 				"doctype": "File",
-				# "attached_to_doctype": 'Job Applicant',#doctype,
-				# "attached_to_name": docname,
+				# "attached_to_doctype": 'Client Registry',#doctype,
+				# "attached_to_name": doc.get("name"),
 				# "attached_to_field": fieldname,
 				# "folder": folder,
 				"file_name": filename,

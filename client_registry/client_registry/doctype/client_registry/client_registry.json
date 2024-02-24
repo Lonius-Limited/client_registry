@@ -23,6 +23,8 @@
   "identifiers_section",
   "identification_type",
   "biometrics_verified",
+  "client_passport_photo",
+  "client_identifier_photo",
   "column_break_47bdy",
   "identification_number",
   "employment_details_section",
@@ -61,7 +63,8 @@
   "unique_patient_identifier",
   "check_digit",
   "full_hash",
-  "pin_number"
+  "pin_number",
+  "agent"
  ],
  "fields": [
   {
@@ -371,11 +374,28 @@
    "fieldname": "pin_number",
    "fieldtype": "Password",
    "label": "PIN Number"
+  },
+  {
+   "fieldname": "agent",
+   "fieldtype": "Link",
+   "label": "Agent",
+   "options": "Client Registry Channel Agent"
+  },
+  {
+   "fieldname": "client_passport_photo",
+   "fieldtype": "Attach Image",
+   "label": "Client Passport Photo"
+  },
+  {
+   "fieldname": "client_identifier_photo",
+   "fieldtype": "Attach Image",
+   "label": "Client Identifier Photo"
   }
  ],
+ "image_field": "client_passport_photo",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-22 17:06:15.030367",
+ "modified": "2024-02-24 17:04:00.767878",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry",
