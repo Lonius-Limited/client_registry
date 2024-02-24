@@ -182,7 +182,7 @@ def face_biometric_validation():
 		frappe.db.commit()
 		d = frappe.get_doc("File", ret.get("name"))
 		urls_to_compare.append(content)
-	return image_comparison_aws_rekognition(urls_to_compare)
+	# return image_comparison_aws_rekognition(urls_to_compare)
 @frappe.whitelist()
 def update_client(payload):#TBD
 	# client_pin = payload.get("pin_number", None)
@@ -370,7 +370,7 @@ def image_comparison_aws_rekognition(files):#Array of two s3 sources
     #         "Bucket": bucket_name,
     #         "Name": targetFile.rpartition("/"[-1])[2]
     #     }}) 
-	# return type(imageTarget)
+	return type(imageTarget)
 
 	response = _REKOGNITION_CLIENT.compare_faces(SimilarityThreshold=90,
 									SourceImage={'Bytes': imageSource},
