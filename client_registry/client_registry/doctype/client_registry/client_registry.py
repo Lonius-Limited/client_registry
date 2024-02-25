@@ -273,12 +273,12 @@ class ClientRegistry(Document):
 		# 	**kwargs, # kwargs are passed to the method as arguments
 		# )
 		frappe.db.commit()
-	def send_alert(self, message):
+	def send_alert(self, message=None):
 		phone = self.get("phone")
 		message =  "{}".format(message)
 		response = sms.send(message, [phone])
 		self.add_comment('Comment', text="{}".format(response))
-	def send_email_alert(self, message):
+	def send_email_alert(self, message=None):
      
 		frappe.sendmail(
 			recipients=[self.get("email")],
