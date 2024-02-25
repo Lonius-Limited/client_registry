@@ -21,5 +21,16 @@ frappe.ui.form.on('Client Registry', {
 				frm.reload_doc();
 			})
 		  }, __("Password Actions"));
+
+		 
+		  frm.add_custom_button(__("Verify Biometrics"), function(){
+			//perform desired action such as routing to new form or fetching etc.
+			frm.call('image_rekognition_match').then(r=>{
+				// frm.call('client_pin')
+				frm.reload_doc();
+			})
+		  },);
+
+		  //image_rekognition_match
 	}
 });

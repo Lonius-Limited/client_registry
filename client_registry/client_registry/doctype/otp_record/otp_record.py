@@ -12,6 +12,7 @@ sms = africastalking.SMS
 
 class OTPRecord(Document):
 	def after_insert(self):
+		return
 		phone = self.get("phone")
 		message =  "Your One Time Pin(OTP) is {}".format(self.get("key"))
 		response = sms.send(message, [phone])

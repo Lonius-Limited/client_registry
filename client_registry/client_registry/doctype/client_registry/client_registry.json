@@ -23,8 +23,10 @@
   "identifiers_section",
   "identification_type",
   "biometrics_verified",
+  "aws_rekognition_payload",
+  "aws_rekognition_match",
   "client_passport_photo",
-  "client_identifier_photo",
+  "client_identifier_photo_id",
   "column_break_47bdy",
   "identification_number",
   "employment_details_section",
@@ -64,7 +66,8 @@
   "check_digit",
   "full_hash",
   "pin_number",
-  "agent"
+  "agent",
+  "banner_image"
  ],
  "fields": [
   {
@@ -383,19 +386,38 @@
   },
   {
    "fieldname": "client_passport_photo",
-   "fieldtype": "Attach Image",
-   "label": "Client Passport Photo"
+   "fieldtype": "Data",
+   "label": "Client Passport Photo",
+   "read_only": 1
   },
   {
-   "fieldname": "client_identifier_photo",
+   "fieldname": "client_identifier_photo_id",
+   "fieldtype": "Data",
+   "label": "Client Identifier Photo ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "banner_image",
    "fieldtype": "Attach Image",
-   "label": "Client Identifier Photo"
+   "label": "Banner Image",
+   "read_only": 1
+  },
+  {
+   "fieldname": "aws_rekognition_payload",
+   "fieldtype": "Long Text",
+   "label": "AWS Rekognition Payload",
+   "read_only": 1
+  },
+  {
+   "fieldname": "aws_rekognition_match",
+   "fieldtype": "Percent",
+   "label": "AWS Rekognition Match"
   }
  ],
- "image_field": "client_passport_photo",
+ "image_field": "banner_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-24 17:04:00.767878",
+ "modified": "2024-02-25 13:35:17.023945",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry",

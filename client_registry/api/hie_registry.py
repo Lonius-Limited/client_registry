@@ -159,30 +159,69 @@ def create_client(payload):
 @frappe.whitelist(allow_guest=1)    
 def face_biometric_validation():
 	files = frappe.request.files
-	id = frappe.form_dict.id
+	docname = frappe.form_dict.id
 
 	content = None
+
+	doc = frappe.get_doc("Client Registry", docname)
 	
 	urls_to_compare =[]
-	for fn in [files['selfie'], files['id_front']]:
-		content = fn.stream.read()
-		filename = fn.filename
-		ret = frappe.get_doc({
+	# for fn in [files['selfie'], files['id_front']]:
+	def _upload_passport_selfie(selfie_obj):
+		# selfie_obj = files['selfie']
+		_context_doc_1 = frappe.get_doc("Client Registry", docname)
+		selfie_content = selfie_obj.stream.read()
+		selfie_filename = selfie_obj.filename
+		selfie_ret = frappe.get_doc({
 				"doctype": "File",
 				"attached_to_doctype": 'Client Registry',#doctype,
-				"attached_to_name": id,
-				# "attached_to_field": fieldname,
+				"attached_to_name": docname,
+				# "attached_to_field": "client_passport_photo",
 				# "folder": folder,
-				"file_name": filename,
+				"file_name": selfie_filename,
 				# "file_url": file_url,
 				"is_private": 0,
-				"content": content
+				"content": selfie_content
 			})
-		ret.save(ignore_permissions=True)
+		selfie_ret.save(ignore_permissions=True)
+		
+		d = frappe.get_doc("File", selfie_ret.get("name"))
+		# if count == 0:
+		_context_doc_1.db_set("client_passport_photo", d.get("file_url"),commit=True)
+		_context_doc_1.add_comment('Comment', text="PASSPORT {}".format(d.get("file_url")))
+		urls_to_compare.append(selfie_content)
 		frappe.db.commit()
-		d = frappe.get_doc("File", ret.get("name"))
-		urls_to_compare.append(content)
+ ##################################ADDING THE ID#####################################
+	def _upload_photo_id(id_obj):
+		# id_obj = files['id_front']
+		_context_doc = frappe.get_doc("Client Registry", docname)
+		id_content = id_obj.stream.read()
+		id_filename = id_obj.filename
+		id_ret = frappe.get_doc({
+				"doctype": "File",
+				"attached_to_doctype": 'Client Registry',#doctype,
+				"attached_to_name": docname,
+				# "attached_to_field": "client_identifier_photo_id",
+				# "folder": folder,
+				"file_name": id_filename,
+				# "file_url": file_url,
+				"is_private": 0,
+				"content": id_content
+			})
+		id_ret.save(ignore_permissions=True)
+		
+		_d = frappe.get_doc("File", id_ret.get("name"))
+		_context_doc.db_set("client_identifier_photo_id", _d.get("file_url"),commit=True)
+		_context_doc.add_comment('Comment', text="PHOTO ID {}".format(_d.get("file_url")))
+		urls_to_compare.append(id_content)
+		frappe.db.commit()
+	_upload_photo_id(files['id_front'])
+	_upload_passport_selfie(files['selfie'])
+	
+	frappe.db.commit()
+	return "UPLOADED"
 	# return image_comparison_aws_rekognition(urls_to_compare)
+
 @frappe.whitelist()
 def update_client(payload):#TBD
 	# client_pin = payload.get("pin_number", None)
@@ -370,7 +409,7 @@ def image_comparison_aws_rekognition(files):#Array of two s3 sources
     #         "Bucket": bucket_name,
     #         "Name": targetFile.rpartition("/"[-1])[2]
     #     }}) 
-	return type(imageTarget)
+	# return type(imageTarget)
 
 	response = _REKOGNITION_CLIENT.compare_faces(SimilarityThreshold=90,
 									SourceImage={'Bytes': imageSource},
