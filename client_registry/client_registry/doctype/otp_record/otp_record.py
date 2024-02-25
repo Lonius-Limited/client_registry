@@ -4,7 +4,7 @@
 import frappe, africastalking
 from frappe import _
 from frappe.model.document import Document
-
+from frappe.email.queue import flush
 
 
 
@@ -44,6 +44,7 @@ class OTPRecord(Document):
 				header=_('One Time PIN')
 			)
 			self.add_comment('Comment', text="{}".format("Email OTP has been sent."))
+			flush()
 	# def send_sms(self):
 # {
 # message: {
