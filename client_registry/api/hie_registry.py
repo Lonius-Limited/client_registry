@@ -215,11 +215,36 @@ def face_biometric_validation():
 		_context_doc.add_comment('Comment', text="PHOTO ID {}".format(_d.get("file_url")))
 		urls_to_compare.append(id_content)
 		frappe.db.commit()
+	##################################ADDING THE FINGERPRINT LEFT THUMB#####################################
+	def _upload_fingerprint_left_thumb(fingerprint_obj):
+		# id_obj = files['id_front']
+		_context_doc = frappe.get_doc("Client Registry", docname)
+		fingerprint_content = fingerprint_obj.stream.read()
+		fingerprint_filename = fingerprint_obj.filename
+		fingerprint_ret = frappe.get_doc({
+				"doctype": "File",
+				"attached_to_doctype": 'Client Registry',#doctype,
+				"attached_to_name": docname,
+				# "attached_to_field": "client_identifier_photo_id",
+				# "folder": folder,
+				"file_name": fingerprint_filename,
+				# "file_url": file_url,
+				"is_private": 0,
+				"content": fingerprint_content
+			})
+		fingerprint_ret.save(ignore_permissions=True)
+		
+		_f = frappe.get_doc("File", fingerprint_ret.get("name"))
+		_context_doc.db_set("fingerprint_left_thumb", _f.get("file_url"),commit=True)
+		_context_doc.add_comment('Comment', text="Fingerprint Left Thumb {}".format(_f.get("file_url")))
+		urls_to_compare.append(fingerprint_content)
+		frappe.db.commit()
 	_upload_photo_id(files['id_front'])
 	_upload_passport_selfie(files['selfie'])
+	_upload_fingerprint_left_thumb(files['fingerprint_left_thumb'])
 	doc.image_rekognition_match()
-	doc.reload()
 	frappe.db.commit()
+	doc.reload()
 	return doc.to_fhir()
 	# return image_comparison_aws_rekognition(urls_to_compare)
 
@@ -338,9 +363,18 @@ def _test_manually_add_dependants():
 @frappe.whitelist()
 def send_otp(*args, **kwargs):
 	payload =  kwargs
+	##
+
+	# wt_secret = frappe.db.get_single_value("Client Registry Settings","security_hash")
+	# if not wt_secret: frappe.throw("Error: Critical security configuration is missing. Please contact the System Administrator")
+	# encoded_pin = payload["encoded_pin"]
+	# pin = jwt.decode(encoded_pin, wt_secret, algorithms=["HS256"])["pin_number"]
+	##
 	phone = ""
+	email = payload.get("email", None)
+	
 	if  "identification_type" in list(dict.fromkeys(payload)):
-		phone = frappe.get_value("Client Registry",dict(identification_type=payload.get("identification_type"),identification_number=payload.get("identification_number")),"phone")
+		phone, email = frappe.get_value("Client Registry",dict(identification_type=payload.get("identification_type"),identification_number=payload.get("identification_number")),["phone","email"])
 	else:
 		phone = payload.get("phone")
 	otp = ''.join(random.choices(string.digits, k=N))
