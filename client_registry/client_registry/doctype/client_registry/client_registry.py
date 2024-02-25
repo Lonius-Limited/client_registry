@@ -3,6 +3,7 @@
 
 import frappe, jwt, random, string, africastalking
 from frappe.model.document import Document
+from frappe import _
 N = 4
 africastalking.initialize(
 username='clientcr',
@@ -17,7 +18,12 @@ class ClientRegistry(Document):
 		self.generate_hash()
 		self.check_duplicate_ids()
 		self.to_fhir()
+		self.set_banner_image()
 		# pass
+	def set_banner_image(self):
+		old_doc = self.get_doc_before_save()
+		# if old_doc.get("client_passport_photo") != self.get("client_passport_photo"):#Only when this changes
+		self.set("banner_image", self.get("client_passport_photo"))
 	def after_insert(self):
 		self.update_dependants()
 	def set_custom_name(self):
@@ -100,6 +106,7 @@ class ClientRegistry(Document):
 			"deceased_datetime": doc.get("deceased_datetime") or "",
 			"phone": doc.get("phone") or "",
    			"biometrics_verified": doc.get("biometrics_verified") or 0,
+			"biometrics_score": doc.get("aws_rekognition_match") or 0,
 			"email": doc.get("email") or "",
 			"country": doc.get("country") or "",
 			"county": doc.get("country") or "",
@@ -204,4 +211,82 @@ class ClientRegistry(Document):
 		# check digit is amount needed to reach next number
 		# divisible by ten. Return an integer
 		return int((10 - (sum % 10)) % 10)
+	def encode_url_image(self, url):
+		import urllib
+		import base64, json
+		url = url
+		contents = urllib.urlopen(url).read()
+		data = base64.b64encode(contents)
+		return data
+	@frappe.whitelist()
+	def image_rekognition_match(self):
+		import boto3,json
+		sourceFile, targetFile = self.get("client_identifier_photo_id") , self.get("client_passport_photo")
+		# return sourceFile, targetFile
+		AWS_SETTINGS = frappe.get_doc("S3 File Attachment")
+		_REKOGNITION_CLIENT = boto3.client(
+			'rekognition',
+			aws_access_key_id=AWS_SETTINGS.get("aws_key"), #"",
+			aws_secret_access_key=AWS_SETTINGS.get("aws_secret"), # "",
+			# aws_session_token=SESSION_TOKEN
+			region_name=AWS_SETTINGS.get("region_name") #""
+		)
+		bucket_name = AWS_SETTINGS.get("bucket_name")
 
+		response = _REKOGNITION_CLIENT.compare_faces(SimilarityThreshold=90,
+										SourceImage={"S3Object": {
+		        "Bucket": bucket_name,
+		        "Name": sourceFile.rpartition("/"[-1])[2]
+		    }},
+										TargetImage={"S3Object": {
+		        "Bucket": bucket_name,
+		        "Name": targetFile.rpartition("/"[-1])[2]
+		    }}) 
+		self.db_set("aws_rekognition_payload", json.dumps(response))
+		self.handle_rekognition_response(response)
+		return response
+	def handle_rekognition_response(self, match_response):
+		face_match = match_response.get("FaceMatches")
+		similarity = 0.0
+		message = "There was a photo mismatch between your selfie and photo ID upload. Please reupload clear photo ID and a selfie for biometric identification."
+		if not face_match:
+			self.db_set("aws_rekognition_match", similarity)
+			self.db_set("biometrics_verified",0)
+			return
+		message = "You have been biometrically verified in the digital health identity platform."
+		similarity = face_match[0]["Similarity"]
+		self.db_set("aws_rekognition_match", similarity)
+		self.db_set("biometrics_verified",1) 
+		# self.send_alert(message=message)
+		self.send_email_alert(message=message)
+		# kwargs = dict(message=message)
+		# frappe.enqueue(
+		# 	self.send_alert, # python function or a module path as string
+		# 	queue="short", # one of short, default, long
+		# 	timeout=None, # pass timeout manually
+		# 	is_async=True, # if this is True, method is run in worker
+		# 	now=False, # if this is True, method is run directly (not in a worker) 
+		# 	job_name=None, # specify a job name
+		# 	enqueue_after_commit=False, # enqueue the job after the database commit is done at the end of the request
+		# 	at_front=False, # put the job at the front of the queue
+		# 	# dict(message=message)
+		# 	**kwargs, # kwargs are passed to the method as arguments
+		# )
+		frappe.db.commit()
+	def send_alert(self, message):
+		phone = self.get("phone")
+		message =  "{}".format(message)
+		response = sms.send(message, [phone])
+		self.add_comment('Comment', text="{}".format(response))
+	def send_email_alert(self, message):
+     
+		frappe.sendmail(
+			recipients=[self.get("email")],
+			subject=frappe._('Biometrics Verification'),
+			# template='birthday_reminder',
+			args=dict(
+				
+				message=message,
+			),
+			header=_('Biometrics Confirmation')
+		)
