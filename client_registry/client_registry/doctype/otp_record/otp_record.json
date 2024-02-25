@@ -9,7 +9,8 @@
   "key",
   "expiry",
   "valid",
-  "phone"
+  "phone",
+  "email"
  ],
  "fields": [
   {
@@ -33,11 +34,16 @@
    "fieldname": "phone",
    "fieldtype": "Data",
    "label": "Phone"
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-20 07:10:37.127803",
+ "modified": "2024-02-25 22:41:59.992886",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "OTP Record",
