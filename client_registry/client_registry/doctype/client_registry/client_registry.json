@@ -29,6 +29,10 @@
   "client_identifier_photo_id",
   "column_break_47bdy",
   "identification_number",
+  "fingerprints_section",
+  "fingerprint_left_thumb",
+  "column_break_2chdu",
+  "fingerprint_right_thumb",
   "employment_details_section",
   "employment_type",
   "other_ids_section",
@@ -412,12 +416,33 @@
    "fieldname": "aws_rekognition_match",
    "fieldtype": "Percent",
    "label": "AWS Rekognition Match"
+  },
+  {
+   "fieldname": "fingerprints_section",
+   "fieldtype": "Section Break",
+   "label": "Fingerprints"
+  },
+  {
+   "fieldname": "fingerprint_left_thumb",
+   "fieldtype": "Data",
+   "label": "Fingerprint Left Thumb",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_2chdu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "fingerprint_right_thumb",
+   "fieldtype": "Data",
+   "label": "Fingerprint Right Thumb",
+   "read_only": 1
   }
  ],
  "image_field": "banner_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-25 13:35:17.023945",
+ "modified": "2024-02-25 20:11:09.648054",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry",
