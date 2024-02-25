@@ -211,13 +211,13 @@ class ClientRegistry(Document):
 		# check digit is amount needed to reach next number
 		# divisible by ten. Return an integer
 		return int((10 - (sum % 10)) % 10)
-	def encode_url_image(self, url):
-		import urllib
-		import base64, json
-		url = url
-		contents = urllib.urlopen(url).read()
-		data = base64.b64encode(contents)
-		return data
+	# def encode_url_image(self, url):
+	# 	import urllib
+	# 	import base64, json
+	# 	url = url
+	# 	contents = urllib.urlopen(url).read()
+	# 	data = base64.b64encode(contents)
+	# 	return data
 	@frappe.whitelist()
 	def image_rekognition_match(self):
 		import boto3,json
