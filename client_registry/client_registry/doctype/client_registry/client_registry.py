@@ -96,7 +96,7 @@ class ClientRegistry(Document):
 			"gender": doc.get("gender") or "",
 			"date_of_birth": doc.get("date_of_birth"),
    			"place_of_birth": doc.get("place_of_birth") or "",
-			"person_with_disability": doc.get("person_with_disability"),
+			"person_with_disability": doc.get("person_with_disability", 0),
 			"citizenship": doc.get("citizenship") or "",
 			"kra_pin": self.get("kra_pin") or "",
 			"preferred_primary_care_network": self.get("preferred_primary_care_network") or "",
@@ -122,6 +122,16 @@ class ClientRegistry(Document):
 			"longitude": doc.get("longitude") or "",
 			"province_state_country": doc.get("province_state_country") or "",
 			"zip_code": doc.get("zip_code") or "",
+			"identification_residence": doc.get("identification_residence", ""),
+			"employer_name": doc.get("employer_name",""),
+			"employer_pin": doc.get("employer_pin",""),
+			"disability_category": doc.get("disability_category",""),
+			"disability_subcategory": doc.get("disability_subcategory",""),
+			"disability_cause": doc.get("disability_cause",""),
+			"in_lawful_custody": doc.get("in_lawful_custody", 0),
+			"admission_remand_number": doc.get("admission_remand_number", ""),
+			"document_uploads": self.get_uploaded_documents() or []
+
 			# "related_to": doc.get("related_to") or "",
 			# "related_to_full_name": doc.get("related_to_full_name") or "",
 			# "relationship": doc.get("relationship") or "",
@@ -131,6 +141,9 @@ class ClientRegistry(Document):
 		}
 		# frappe.msgprint("{}".format(fhir))
 		return fhir
+	def get_uploaded_documents(self):
+		return frappe.db.get_all("Client Registry Document Upload", filters=dict(client=self.get("name"),docstatus=1), fields=["name","document_type","document_number", "attachment"], order_by="creation desc")
+		
 	def next_of_kins(self):
 		payload = self.get("dependants")
 		return list(map(lambda x: dict(linked_record=x.get("linked_record"), full_name="{} {}".format(x.get("first_name"), x.get("last_name")), relationship=x.get("relationship")) ,payload))

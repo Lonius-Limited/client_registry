@@ -15,12 +15,17 @@
   "preferred_primary_care_network",
   "column_break_5",
   "person_with_disability",
+  "disability_category",
+  "disability_subcategory",
+  "disability_cause",
   "gender",
   "date_of_birth",
   "civil_status",
   "place_of_birth",
   "citizenship",
   "identifiers_section",
+  "in_lawful_custody",
+  "admission_remand_number",
   "identification_type",
   "biometrics_verified",
   "aws_rekognition_payload",
@@ -35,6 +40,8 @@
   "fingerprint_right_thumb",
   "employment_details_section",
   "employment_type",
+  "employer_name",
+  "employer_pin",
   "other_ids_section",
   "other_identification_docs",
   "column_break_14",
@@ -43,6 +50,7 @@
   "is_alive",
   "deceased_datetime",
   "current_address_contacts_and_residence_tab",
+  "identification_residence",
   "postal_address",
   "phone",
   "email",
@@ -437,12 +445,54 @@
    "fieldtype": "Data",
    "label": "Fingerprint Right Thumb",
    "read_only": 1
+  },
+  {
+   "fieldname": "identification_residence",
+   "fieldtype": "Long Text",
+   "label": "Identification Residence",
+   "read_only": 1
+  },
+  {
+   "fieldname": "disability_category",
+   "fieldtype": "Data",
+   "label": "Disability Category"
+  },
+  {
+   "fieldname": "disability_subcategory",
+   "fieldtype": "Data",
+   "label": "Disability SubCategory"
+  },
+  {
+   "fieldname": "disability_cause",
+   "fieldtype": "Data",
+   "label": "Disability Cause"
+  },
+  {
+   "default": "0",
+   "fieldname": "in_lawful_custody",
+   "fieldtype": "Check",
+   "label": "In Lawful Custody"
+  },
+  {
+   "fieldname": "admission_remand_number",
+   "fieldtype": "Data",
+   "label": "Admission / Remand Number"
+  },
+  {
+   "fieldname": "employer_name",
+   "fieldtype": "Data",
+   "label": "Employer Name"
+  },
+  {
+   "fieldname": "employer_pin",
+   "fieldtype": "Data",
+   "label": "Employer PIN"
   }
  ],
  "image_field": "banner_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-25 20:11:09.648054",
+ "modified": "2024-02-26 01:55:19.951643",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry",
