@@ -1,67 +1,66 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:{organization}-{agent_id}",
- "creation": "2024-02-24 16:28:42.606606",
+ "creation": "2024-02-26 02:18:34.392456",
  "default_view": "List",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "organization",
-  "agent_id",
-  "agent_name",
-  "phone",
-  "email",
+  "client",
+  "document_type",
+  "document_number",
+  "attachment",
   "amended_from"
  ],
  "fields": [
   {
-   "fieldname": "organization",
+   "fieldname": "client",
    "fieldtype": "Link",
-   "label": "Organization",
-   "options": "Client Registry Channel Organization"
+   "label": "Client",
+   "options": "Client Registry",
+   "reqd": 1
   },
   {
-   "fieldname": "phone",
-   "fieldtype": "Data",
-   "label": "Phone"
+   "fieldname": "document_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Document Type",
+   "options": "Client Registry Document Type",
+   "reqd": 1
   },
   {
-   "fieldname": "email",
+   "fieldname": "document_number",
    "fieldtype": "Data",
-   "label": "Email"
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Document Number"
+  },
+  {
+   "fieldname": "attachment",
+   "fieldtype": "Data",
+   "label": "Attachment",
+   "reqd": 1
   },
   {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Client Registry Channel Agent",
+   "options": "Client Registry Document Upload",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
-  },
-  {
-   "fieldname": "agent_name",
-   "fieldtype": "Data",
-   "label": "Agent Name"
-  },
-  {
-   "fieldname": "agent_id",
-   "fieldtype": "Data",
-   "label": "agent_id",
-   "unique": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-02-26 02:05:40.464872",
+ "modified": "2024-02-26 02:28:15.151566",
  "modified_by": "Administrator",
  "module": "Client Registry",
- "name": "Client Registry Channel Agent",
- "naming_rule": "Expression",
+ "name": "Client Registry Document Upload",
  "owner": "Administrator",
  "permissions": [
   {

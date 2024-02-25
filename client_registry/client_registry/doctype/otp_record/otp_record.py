@@ -23,6 +23,7 @@ class OTPRecord(Document):
 		return
 	def send_message(self):
 		phone = self.get("phone")
+		if not phone: return
 		message =  "Your One Time Pin(OTP) is {}".format(self.get("key"))
 		response = self.initialize_sms_provider().send(message, [phone])
 		self.add_comment('Comment', text="{}".format(response))
@@ -34,7 +35,7 @@ class OTPRecord(Document):
 				recipients=[email],
 				subject=frappe._('One Time PIN'),
 				# template='birthday_reminder',
-				now=True,
+				# now=True,
 				args=dict(
 					
 					message="Your One Time Pin(OTP) is {}".format(self.get("key")),
