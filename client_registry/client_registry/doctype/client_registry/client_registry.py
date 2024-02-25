@@ -5,15 +5,17 @@ import frappe, jwt, random, string, africastalking
 from frappe.model.document import Document
 from frappe import _
 N = 4
-def _get_api_key():
-    return frappe.db.get_single_value("Client Registry Settings","africastalking_sms_api")
-africastalking.initialize(
-username='clientcr',
-api_key=_get_api_key())
-sms = africastalking.SMS
+
+
 class ClientRegistry(Document):
-	# def autoname(self):
-	# 	pass
+	def _get_api_key(self):
+		return frappe.db.get_single_value("Client Registry Settings","africastalking_sms_api")
+	def initialize_sms_provider(self):
+		africastalking.initialize(
+		username='clientcr',
+		api_key=self._get_api_key())
+		sms = africastalking.SMS
+		return sms
 	def before_save(self):
 		self.set_custom_name()
 		self.make_check_digit()
@@ -70,7 +72,7 @@ class ClientRegistry(Document):
 	def send_pin_to_phone(self):
 		phone = self.get("phone")
 		message =  "Dear {}. The PIN for your account is {}.".format(self.get("full_name"), self.get_password("pin_number"))
-		response = sms.send(message, [phone])
+		response = self.initialize_sms_provider().send(message, [phone])
 		self.add_comment('Comment', text="{}".format(response))
 	def to_fhir(self):
 		doc = self
@@ -278,7 +280,7 @@ class ClientRegistry(Document):
 	def send_alert(self, message=None):
 		phone = self.get("phone")
 		message =  "{}".format(message)
-		response = sms.send(message, [phone])
+		response = self.initialize_sms_provider().send(message, [phone])
 		self.add_comment('Comment', text="{}".format(response))
 	def send_email_alert(self, message=None):
      
