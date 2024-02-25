@@ -258,7 +258,7 @@ class ClientRegistry(Document):
 		self.db_set("aws_rekognition_match", similarity)
 		self.db_set("biometrics_verified",1) 
 		# self.send_alert(message=message)
-		self.send_email_alert(message=message)
+		# self.send_email_alert(message=message)
 		# kwargs = dict(message=message)
 		# frappe.enqueue(
 		# 	self.send_alert, # python function or a module path as string
