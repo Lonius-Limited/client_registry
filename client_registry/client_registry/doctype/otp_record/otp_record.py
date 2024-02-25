@@ -4,7 +4,7 @@
 import frappe, africastalking
 from frappe import _
 from frappe.model.document import Document
-
+from frappe.email.queue import flush
 
 
 
@@ -36,13 +36,15 @@ class OTPRecord(Document):
 				subject=frappe._('One Time PIN'),
 				# template='birthday_reminder',
 				# now=True,
-				args=dict(
+				message="Your One Time Pin(OTP) is {}".format(self.get("key")),
+				# args=dict(
 					
-					message="Your One Time Pin(OTP) is {}".format(self.get("key")),
-				),
+				# 	message="Your One Time Pin(OTP) is {}".format(self.get("key")),
+				# ),
 				header=_('One Time PIN')
 			)
 			self.add_comment('Comment', text="{}".format("Email OTP has been sent."))
+			flush()
 	# def send_sms(self):
 # {
 # message: {
