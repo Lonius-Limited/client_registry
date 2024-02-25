@@ -3,7 +3,7 @@ import json
 import jwt
 import string, random, requests
 from datetime import datetime
-
+from frappe import _
 import urllib
 
 N=4
@@ -370,18 +370,20 @@ def send_otp(*args, **kwargs):
 	# encoded_pin = payload["encoded_pin"]
 	# pin = jwt.decode(encoded_pin, wt_secret, algorithms=["HS256"])["pin_number"]
 	##
-	phone = ""
+	phone = payload.get("phone", None)
 	email = payload.get("email", None)
 	
 	if  "identification_type" in list(dict.fromkeys(payload)):
 		phone, email = frappe.get_value("Client Registry",dict(identification_type=payload.get("identification_type"),identification_number=payload.get("identification_number")),["phone","email"])
-	else:
-		phone = payload.get("phone")
+	# else:
+		
 	otp = ''.join(random.choices(string.digits, k=N))
-	args = dict(doctype="OTP Record",key=otp, valid=1,phone=phone)
+	args = dict(doctype="OTP Record",key=otp, valid=1,phone=phone, email=email)
 	doc = frappe.get_doc(args).save(ignore_permissions=True)
+	
 	frappe.db.commit()
-	return dict(otp_record=doc.get("name"))
+	return dict(otp_record=doc.get("name"))	
+
 @frappe.whitelist()
 def validate_otp(*args, **kwargs):
 	payload = kwargs
