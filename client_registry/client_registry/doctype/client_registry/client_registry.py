@@ -258,7 +258,7 @@ class ClientRegistry(Document):
 		self.db_set("aws_rekognition_match", similarity)
 		self.db_set("biometrics_verified",1) 
 		# self.send_alert(message=message)
-		self.send_email_alert(message=message)
+		# self.send_email_alert(message=message)
 		# kwargs = dict(message=message)
 		# frappe.enqueue(
 		# 	self.send_alert, # python function or a module path as string
@@ -273,12 +273,12 @@ class ClientRegistry(Document):
 		# 	**kwargs, # kwargs are passed to the method as arguments
 		# )
 		frappe.db.commit()
-	def send_alert(self, message):
+	def send_alert(self, message=None):
 		phone = self.get("phone")
 		message =  "{}".format(message)
 		response = sms.send(message, [phone])
 		self.add_comment('Comment', text="{}".format(response))
-	def send_email_alert(self, message):
+	def send_email_alert(self, message=None):
      
 		frappe.sendmail(
 			recipients=[self.get("email")],

@@ -217,9 +217,10 @@ def face_biometric_validation():
 		frappe.db.commit()
 	_upload_photo_id(files['id_front'])
 	_upload_passport_selfie(files['selfie'])
-	
+	doc.image_rekognition_match()
+	doc.reload()
 	frappe.db.commit()
-	return "UPLOADED"
+	return doc.to_fhir()
 	# return image_comparison_aws_rekognition(urls_to_compare)
 
 @frappe.whitelist()
