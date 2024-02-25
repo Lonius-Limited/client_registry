@@ -5,9 +5,11 @@ import frappe, jwt, random, string, africastalking
 from frappe.model.document import Document
 from frappe import _
 N = 4
+def _get_api_key():
+    return frappe.db.get_single_value("Client Registry Settings","africastalking_sms_api")
 africastalking.initialize(
 username='clientcr',
-api_key=frappe.db.get_single_value("Client Registry Settings","africastalking_sms_api"))
+api_key=_get_api_key())
 sms = africastalking.SMS
 class ClientRegistry(Document):
 	# def autoname(self):
