@@ -5,9 +5,12 @@ import frappe, africastalking
 from frappe import _
 from frappe.model.document import Document
 
+
+def _get_api_key():
+	return frappe.db.get_single_value("Client Registry Settings","africastalking_sms_api")
 africastalking.initialize(
 username='clientcr',
-api_key=frappe.db.get_single_value("Client Registry Settings","africastalking_sms_api"))
+api_key=_get_api_key())
 sms = africastalking.SMS
 
 class OTPRecord(Document):
