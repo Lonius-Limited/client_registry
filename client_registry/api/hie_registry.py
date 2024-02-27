@@ -157,7 +157,7 @@ def create_client(payload):
 	# if 
 	frappe.db.commit()
 	return doc.to_fhir()
-@frappe.whitelist(allow_guest=1)    
+@frappe.whitelist()    
 def face_biometric_validation():
 	files = frappe.request.files
 	docname = frappe.form_dict.id
@@ -250,11 +250,27 @@ def face_biometric_validation():
 	# return image_comparison_aws_rekognition(urls_to_compare)
 
 @frappe.whitelist()
-def update_client(payload):#TBD
-	# client_pin = payload.get("pin_number", None)
-	# if not client_pin: frappe.throw("Please provide PIN number for this client inorder to update.")
+def update_client(payload):#TBD-->Make sure encoded_pin is included
+	if isinstance(payload, str):
+		payload =json.loads(payload)
+	# ==================================================================
+	encoded_pin = payload.pop("encoded_pin", None)
+ 
+	if not encoded_pin: frappe.throw("Client PIN is required for this client inorder to update this record.")
+ 
+	wt_secret = frappe.db.get_single_value("Client Registry Settings","security_hash")
+ 
+	if not wt_secret: frappe.throw("Error: Critical security configuration is missing. Please contact the System Administrator")
+	
+	pin_number = jwt.decode(encoded_pin, wt_secret, algorithms=["HS256"])["pin_number"]
+
+	#=====================================================================
+ 
 	doc = frappe.get_doc("Client Registry", payload.pop("id"))
-	# if doc.get_password("pin_number") != client_pin: frappe.throw("Invalid PIN, please reset and/or try again")
+ 
+	if not doc.validate_pin(pin_number) : frappe.throw("Invalid PIN, please reset and/or try again")
+ 
+	#=====================================================================
 	valid_keys = list(dict.fromkeys(doc.__dict__))
 	keys = [x for x in list(dict.fromkeys(payload)) if x in valid_keys] #Don't send bogus keys, we won't bother. Is it a good idea?
 	for k in keys:
@@ -361,23 +377,31 @@ def _test_manually_add_dependants():
 	to_update=dict(id="CR00000001", dependants=dependants)
 	print("Sending,===>", to_update)
 	update_client(to_update)
+def validate_pin(payload):
+	encoded_pin = payload.pop('encoded_pin')
+	wt_secret = frappe.db.get_single_value("Client Registry Settings","security_hash")
+	if not wt_secret: frappe.throw("Error: Critical security configuration is missing. Please contact the System Administrator")
+	pin = jwt.decode(encoded_pin, wt_secret, algorithms=["HS256"])["pin_number"]
+	docname = frappe.get_value("Client Registry",payload,'name')
+	return frappe.get_doc("Client Registry", docname).validate_pin(pin)
+
 @frappe.whitelist()
 def send_otp(*args, **kwargs):
 	payload =  kwargs
-	##
+	# #
 
 	# wt_secret = frappe.db.get_single_value("Client Registry Settings","security_hash")
 	# if not wt_secret: frappe.throw("Error: Critical security configuration is missing. Please contact the System Administrator")
 	# encoded_pin = payload["encoded_pin"]
 	# pin = jwt.decode(encoded_pin, wt_secret, algorithms=["HS256"])["pin_number"]
-	##
+	# #
 	phone = payload.get("phone", None)
 	email = payload.get("email", None)
 	
 	if  "identification_type" in list(dict.fromkeys(payload)):
+		if "encoded_pin" in list(dict.fromkeys(payload)): 
+			if not validate_pin(payload): frappe.throw("Sorry, Invalid Pin")
 		phone, email = frappe.get_value("Client Registry",dict(identification_type=payload.get("identification_type"),identification_number=payload.get("identification_number")),["phone","email"])
-	# else:
-		
 	otp = ''.join(random.choices(string.digits, k=N))
 	args = dict(doctype="OTP Record",key=otp, valid=1,phone=phone, email=email)
 	doc = frappe.get_doc(args).save(ignore_permissions=True)
@@ -403,7 +427,7 @@ def nrb_by_id(*args, **kwargs):
 	url = "https://neaims.go.ke/genapi/api/IPRS/GetPersonByID/{}".format(id)
 	response = requests.get(url).json()
 	return response
-@frappe.whitelist(allow_guest=1)
+@frappe.whitelist()
 def reset_pin(*args, **kwargs):
 	wt_secret = frappe.db.get_single_value("Client Registry Settings","security_hash")
 	if not wt_secret: frappe.throw("Error: Critical security configuration is missing. Please contact the System Administrator")
@@ -417,7 +441,7 @@ def read_image(file_path):
 	with open(file_path, "rb") as file:
 		image_bytes = file.read()
 	return image_bytes
-@frappe.whitelist(allow_guest=1)
+@frappe.whitelist()
 def image_comparison_aws_rekognition(files):#Array of two s3 sources
 	import boto3
 	import urllib.parse
@@ -507,7 +531,7 @@ def image_matching(filename1, filename2):
 		return results[0]
 	except Exception as e:
 		frappe.throw("{}".format(e))
-@frappe.whitelist(allow_guest=1)
+@frappe.whitelist()
 def extract_identification_number_from_id_scan():
 	files = frappe.request.files
 	# for file in files:
@@ -520,7 +544,7 @@ def extract_identification_number_from_id_scan():
 	frappe.local.uploaded_file = content
 	frappe.local.uploaded_filename = filename
 	return document_extract(filename=None, _file_bytes=content)
-@frappe.whitelist(allow_guest=1)
+@frappe.whitelist()
 def match_images_from_upload():
 	files = frappe.request.files
 	
