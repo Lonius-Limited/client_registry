@@ -24,9 +24,9 @@
   "place_of_birth",
   "citizenship",
   "identifiers_section",
+  "identification_type",
   "in_lawful_custody",
   "admission_remand_number",
-  "identification_type",
   "biometrics_verified",
   "aws_rekognition_payload",
   "aws_rekognition_match",
@@ -394,7 +394,8 @@
    "fieldname": "agent",
    "fieldtype": "Link",
    "label": "Agent",
-   "options": "Client Registry Channel Agent"
+   "options": "Client Registry Channel Agent",
+   "reqd": 1
   },
   {
    "fieldname": "client_passport_photo",
@@ -492,7 +493,7 @@
  "image_field": "banner_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-26 01:55:19.951643",
+ "modified": "2024-02-27 19:32:25.155863",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry",

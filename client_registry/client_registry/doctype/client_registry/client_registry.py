@@ -59,6 +59,9 @@ class ClientRegistry(Document):
 		encoded_jwt = jwt.encode(id_payload, wt_secret , algorithm="HS256")
 		self.id_hash = encoded_jwt[:140]
 		self.full_hash = encoded_jwt
+	def validate_pin(self, pin):
+		if not self.get("pin_number"): return False
+		return str(self.get_password("pin_number")) == str(pin)
 	@frappe.whitelist()
 	def generate_pin(self, pin_number=None):
 		self.set("pin_number" , pin_number or ''.join(random.choices(string.digits, k=N)))
@@ -68,6 +71,7 @@ class ClientRegistry(Document):
 	def client_pin(self):
 		print(self.get_password("pin_number"))
 		frappe.msgprint(self.get_password("pin_number"))
+		return self.get_password("pin_number")
 	@frappe.whitelist()
 	def send_pin_to_phone(self):
 		phone = self.get("phone")
