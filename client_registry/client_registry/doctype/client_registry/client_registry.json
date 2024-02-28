@@ -395,7 +395,8 @@
    "fieldtype": "Link",
    "label": "Agent",
    "options": "Client Registry Channel Agent",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "client_passport_photo",
@@ -449,7 +450,7 @@
   },
   {
    "fieldname": "identification_residence",
-   "fieldtype": "Long Text",
+   "fieldtype": "Text",
    "label": "Identification Residence",
    "read_only": 1
   },
@@ -493,7 +494,7 @@
  "image_field": "banner_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-27 19:32:25.155863",
+ "modified": "2024-02-28 18:51:02.065780",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry",

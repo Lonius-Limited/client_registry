@@ -58,7 +58,8 @@ def client_lookup_nrb_search(payload, page_length=5):
 	if (len(result)<1): return fetch_and_post_from_nrb(payload, encoded_pin)
 	return dict(total=len(result), result=result)
 def fetch_and_post_from_nrb(payload, encoded_pin=None, only_return_payload=1):
-	#
+	######
+	if not payload.get("agent"): frappe.throw("Please provide your Agent ID provided during API onboarding")
 	######
 	
 	if not encoded_pin: frappe.throw("Sorry, PIN is a required attribute to create a record in the client registry.")
@@ -95,7 +96,8 @@ def fetch_and_post_from_nrb(payload, encoded_pin=None, only_return_payload=1):
 				identification_number = payload.get("identification_number"),
 				citizenship = nrb_data.get("Citizenship").upper(),
 				place_of_birth = nrb_data.get("Place_of_Birth"),
-				pin_number = pin_number
+				pin_number = pin_number,
+				agent = payload.get("agent")
 			)
 			doc = frappe.get_doc(args).insert(ignore_permissions=1, ignore_mandatory=1)
 			
