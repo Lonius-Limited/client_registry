@@ -91,7 +91,7 @@ def fetch_and_post_from_nrb(payload, encoded_pin=None, only_return_payload=1):
 				gender = gender,
 				date_of_birth = dob,
 				# civil_status = nrb_data.get(""),
-				identification_residence = payload.get("Place_of_Live", None),
+				identification_residence = nrb_data.get("Place_of_Live", None),
 				identification_type = payload.get("identification_type"),
 				identification_number = payload.get("identification_number"),
 				citizenship = nrb_data.get("Citizenship").upper(),
