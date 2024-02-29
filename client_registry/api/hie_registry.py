@@ -82,6 +82,11 @@ def fetch_and_post_from_nrb(payload, encoded_pin=None, only_return_payload=1):
 		date_string = nrb_data.get("Date_of_Birth").split(" ")[0] 
 		date_format = "%m/%d/%Y"
 		dob = datetime.strptime(date_string, date_format)
+		print(payload.get("date_of_birth"))
+		if payload.get("date_of_birth"):
+			print("Comparing {} and {}".format(payload.get("date_of_birth"),str(dob).split(" ")[0]))
+			if 	payload.get("date_of_birth") != str(dob).split(" ")[0]:
+				frappe.throw("The provided date of birth does not match the date of birth in the persons registry database.")
 		try:
 			args = dict(
 				doctype="Client Registry",
