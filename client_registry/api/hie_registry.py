@@ -257,25 +257,25 @@ def face_biometric_validation():
 	# return image_comparison_aws_rekognition(urls_to_compare)
 
 @frappe.whitelist()
-def update_client(payload):#TBD-->Make sure encoded_pin is included
+def update_client(payload):#TBD-->Make sure encoded_pin is (*args, **kwargs))
 	if isinstance(payload, str):
 		payload =json.loads(payload)
 	# ==================================================================
 	encoded_pin = payload.pop("encoded_pin", None)
  
-	if not encoded_pin: frappe.throw("Client PIN is required for this client inorder to update this record.")
+	# if not encoded_pin: frappe.throw("Client PIN is required for this client inorder to update this record.")
  
-	wt_secret = frappe.db.get_single_value("Client Registry Settings","security_hash")
+	# wt_secret = frappe.db.get_single_value("Client Registry Settings","security_hash")
  
-	if not wt_secret: frappe.throw("Error: Critical security configuration is missing. Please contact the System Administrator")
+	# if not wt_secret: frappe.throw("Error: Critical security configuration is missing. Please contact the System Administrator")
 	
-	pin_number = jwt.decode(encoded_pin, wt_secret, algorithms=["HS256"])["pin_number"]
+	# pin_number = jwt.decode(encoded_pin, wt_secret, algorithms=["HS256"])["pin_number"]
 
-	#=====================================================================
+	# #=====================================================================
  
 	doc = frappe.get_doc("Client Registry", payload.pop("id"))
  
-	if not doc.validate_pin(pin_number) : frappe.throw("Invalid PIN, please reset and/or try again")
+	# if not doc.validate_pin(pin_number) : frappe.throw("Invalid PIN, please reset and/or try again")
  
 	#=====================================================================
 	valid_keys = list(dict.fromkeys(doc.__dict__))
