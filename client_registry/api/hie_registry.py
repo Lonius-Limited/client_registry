@@ -508,7 +508,7 @@ def document_extract(filename=None, _file_bytes=None):
 	id = list(filter(lambda y: re.search("B0(.*?)F",y), f))
 	if not id: return ""
 	_match =  id[0]
-	return  dict(identification_number=re.search("B0(.*?)F",_match).group(1))
+	return  dict(identification_number=re.search("B0(.*?)[A-Z]",_match).group(1))
 	# id_regex =  re.search("^B0 & F$",y) #^B0[^BF]*F$
  	# print(response)
 	# return f, id
