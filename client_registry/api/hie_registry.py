@@ -34,6 +34,11 @@ def client_lookup(payload, page_length=5):
 @frappe.whitelist()
 def client_lookup_nrb_search(payload, page_length=5):
 	# payload = kwargs
+	# {'identification_type': 'National ID',
+	# 'identification_number': '27613716',
+	# 'date_of_birth': '1990-05-02',
+	# 'agent': 'SAFARICOM PLC-89204020',
+	# 'encoded_pin': 'ew0KICAidHlwIjoiSldUIiwNCiAgImFsZyI6IkhTMjU2Ig0KfQ.ew0KICAicGluX251bWJlciI6IjE4NjYiDQp9.vo0YGIO-FUC4oD2px3XnK1ft1pTvsZHEe5dnmLET7l8'}
 	result = []
 	if isinstance(payload, str):
 		payload =json.loads(payload)
@@ -58,6 +63,11 @@ def client_lookup_nrb_search(payload, page_length=5):
 	if (len(result)<1): return fetch_and_post_from_nrb(payload, encoded_pin)
 	return dict(total=len(result), result=result)
 def fetch_and_post_from_nrb(payload, encoded_pin=None, only_return_payload=1):
+    ###Another check
+	exists = frappe.db.get_value("Client Registry",dict(identification_number=payload.get("identification_number"),identification_type = payload.get("identification_type")),"name")
+	if exists:
+		doc = frappe.get_doc("Client Registry", exists)
+		return doc.to_fhir()
 	######
 	if not payload.get("agent"): frappe.throw("Please provide your Agent ID provided during API onboarding")
 	######
@@ -170,13 +180,17 @@ def face_biometric_validation():
 	docname = frappe.form_dict.id
 
 	content = None
+	doc = None
 
-	doc = frappe.get_doc("Client Registry", docname)
+	if docname:
+		doc = frappe.get_doc("Client Registry", docname)
 	
 	urls_to_compare =[]
 	# for fn in [files['selfie'], files['id_front']]:
 	def _upload_passport_selfie(selfie_obj):
 		# selfie_obj = files['selfie']
+		_context_doc_1 = None
+		# if docname:
 		_context_doc_1 = frappe.get_doc("Client Registry", docname)
 		selfie_content = selfie_obj.stream.read()
 		selfie_filename = selfie_obj.filename
@@ -195,6 +209,7 @@ def face_biometric_validation():
 		
 		d = frappe.get_doc("File", selfie_ret.get("name"))
 		# if count == 0:
+		# if docname:
 		_context_doc_1.db_set("client_passport_photo", d.get("file_url"),commit=True)
 		_context_doc_1.add_comment('Comment', text="PASSPORT {}".format(d.get("file_url")))
 		urls_to_compare.append(selfie_content)
