@@ -32,7 +32,11 @@ def client_lookup(payload, page_length=5):
 		result.append(doc.to_fhir())
 	return dict(total=len(result), result=result)
 @frappe.whitelist()
-def client_lookup_nrb_search(payload, page_length=5):
+def client_lookup_nrb_search(payload, page_length=5):	
+	# files = frappe.request.files
+	# docname = frappe.form_dict.id
+
+    
 	# payload = kwargs
 	# {'identification_type': 'National ID',
 	# 'identification_number': '27613716',
@@ -60,9 +64,9 @@ def client_lookup_nrb_search(payload, page_length=5):
 	for record in records:
 		doc = frappe.get_doc("Client Registry", record.get("name"))
 		result.append(doc.to_fhir())
-	if (len(result)<1): return fetch_and_post_from_nrb(payload, encoded_pin)
+	if (len(result)<1): return fetch_and_post_from_nrb(payload, encoded_pin, files=None)
 	return dict(total=len(result), result=result)
-def fetch_and_post_from_nrb(payload, encoded_pin=None, only_return_payload=1):
+def fetch_and_post_from_nrb(payload, encoded_pin=None, files=None):
     ###Another check
 	exists = frappe.db.get_value("Client Registry",dict(identification_number=payload.get("identification_number"),identification_type = payload.get("identification_type")),"name")
 	if exists:
@@ -115,7 +119,23 @@ def fetch_and_post_from_nrb(payload, encoded_pin=None, only_return_payload=1):
 				agent = payload.get("agent")
 			)
 			doc = frappe.get_doc(args).insert(ignore_permissions=1, ignore_mandatory=1)
-			
+			if files:
+				selfie_obj = files['selfie']
+				selfie_content = selfie_obj.stream.read()
+				selfie_filename = selfie_obj.filename
+				selfie_ret = frappe.get_doc({
+						"doctype": "File",
+						"attached_to_doctype": 'Client Registry',#doctype,
+						"attached_to_name": doc.get("name"),
+						# "attached_to_field": "client_passport_photo",
+						# "folder": folder,
+						"file_name": selfie_filename,
+						# "file_url": file_url,
+						"is_private": 0,
+						"content": selfie_content
+					})
+				selfie_ret.save(ignore_permissions=True)
+				frappe.db.commit()
 			# doc.set("pin_number",pin_number)
 			# doc.save()
 			frappe.db.commit()
@@ -123,7 +143,11 @@ def fetch_and_post_from_nrb(payload, encoded_pin=None, only_return_payload=1):
 			return doc.to_fhir()
 		except Exception as e:
 			frappe.db.rollback()
-			frappe.throw("{}".format(e))
+			exists = frappe.db.get_value("Client Registry",dict(identification_number=payload.get("identification_number"),identification_type = payload.get("identification_type")),"name")
+			if exists:
+				doc = frappe.get_doc("Client Registry", exists)
+				return doc.to_fhir()
+			# frappe.throw("{}".format(e))
 			
 		
 	else:
@@ -174,6 +198,28 @@ def create_client(payload):
 	# if 
 	frappe.db.commit()
 	return doc.to_fhir()
+# @frappe.whitelist()
+# def upload_documents():
+# 	files = frappe.request.files
+# 	docname = frappe.form_dict.id
+# 	# selfie_obj = files['selfie']
+# 	_context_doc_1 = None
+# 	# if docname:
+# 	_context_doc_1 = frappe.get_doc("Client Registry", docname)
+# 	selfie_content = obj.stream.read()
+# 	selfie_filename = obj.filename
+# 	selfie_ret = frappe.get_doc({
+# 			"doctype": "File",
+# 			"attached_to_doctype": 'Client Registry',#doctype,
+# 			"attached_to_name": docname,
+# 			# "attached_to_field": "client_passport_photo",
+# 			# "folder": folder,
+# 			"file_name": selfie_filename,
+# 			# "file_url": file_url,
+# 			"is_private": 0,
+# 			"content": selfie_content
+# 		})
+# 	selfie_ret.save(ignore_permissions=True)
 @frappe.whitelist()    
 def face_biometric_validation():
 	files = frappe.request.files
@@ -182,8 +228,8 @@ def face_biometric_validation():
 	content = None
 	doc = None
 
-	if docname:
-		doc = frappe.get_doc("Client Registry", docname)
+	# if docname:
+	doc = frappe.get_doc("Client Registry", docname) #Must be provided
 	
 	urls_to_compare =[]
 	# for fn in [files['selfie'], files['id_front']]:
@@ -267,8 +313,8 @@ def face_biometric_validation():
 	_upload_fingerprint_left_thumb(files['fingerprint_left_thumb'])
 	doc.image_rekognition_match()
 	frappe.db.commit()
-	doc.reload()
-	return doc.to_fhir()
+	# doc.reload()
+	return frappe.get_doc("Client Registry",docname).to_fhir()
 	# return image_comparison_aws_rekognition(urls_to_compare)
 
 @frappe.whitelist()

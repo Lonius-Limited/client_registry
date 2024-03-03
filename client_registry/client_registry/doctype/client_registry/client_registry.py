@@ -134,7 +134,8 @@ class ClientRegistry(Document):
 			"disability_cause": doc.get("disability_cause",""),
 			"in_lawful_custody": doc.get("in_lawful_custody", 0),
 			"admission_remand_number": doc.get("admission_remand_number", ""),
-			"document_uploads": self.get_uploaded_documents() or []
+			"document_uploads": self.get_uploaded_documents() or [],
+			# "spouse_dependant": self.get("spouse_verified")
 
 			# "related_to": doc.get("related_to") or "",
 			# "related_to_full_name": doc.get("related_to_full_name") or "",
@@ -145,6 +146,9 @@ class ClientRegistry(Document):
 		}
 		# frappe.msgprint("{}".format(fhir))
 		return fhir
+	def spouse_dependant(self):
+		sql = "SELECT B.name as id, B.relationship as relationship, B.spouse_verified as spouse_verified, B.parent AS linked_record, A.full_name FROM `tabClient Registry` A INNER JOIN `tabDependants` B ON A.name=B.parent WHERE B.linked_record= '{}'".format(self.get("name"))
+		return frappe.db.sql(sql, as_dict=1)
 	def get_uploaded_documents(self):
 		return frappe.db.get_all("Client Registry Document Upload", filters=dict(client=self.get("name"),docstatus=1), fields=["name","document_type","document_number", "attachment"], order_by="creation desc")
 		

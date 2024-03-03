@@ -45,6 +45,7 @@
   "other_ids_section",
   "other_identification_docs",
   "column_break_14",
+  "spouse_verified",
   "dependants",
   "deceasedstatus_tab",
   "is_alive",
@@ -489,12 +490,18 @@
    "fieldname": "employer_pin",
    "fieldtype": "Data",
    "label": "Employer PIN"
+  },
+  {
+   "default": "0",
+   "fieldname": "spouse_verified",
+   "fieldtype": "Check",
+   "label": "Spouse Verified"
   }
  ],
  "image_field": "banner_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-28 18:51:02.065780",
+ "modified": "2024-03-02 17:05:53.954466",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry",
