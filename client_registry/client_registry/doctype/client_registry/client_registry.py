@@ -117,9 +117,9 @@ class ClientRegistry(Document):
 			"phone": doc.get_masked_string("phone") or "" if not unmask else doc.get("phone"),
    			"biometrics_verified": doc.get("biometrics_verified") or 0,
 			"biometrics_score": doc.get("aws_rekognition_match") or 0,
-			"email": doc.get("email") or "",
+			"email": doc.get_masked_string("email") or "" if not unmask else doc.get("email"),
 			"country": doc.get("country") or "",
-			"county": doc.get("country") or "",
+			"county": doc.get("county") or "",
 			"sub_county": doc.get("sub_county") or "",
 			"ward": doc.get("ward") or "",
 			"village_estate": doc.get("village_estate") or "",
@@ -149,7 +149,7 @@ class ClientRegistry(Document):
 		# frappe.msgprint("{}".format(fhir))
 		# if not fhir.get
 		return fhir
-	def get_masked_string(self, fieldname, plain_str=None):
+	def get_masked_string(self, fieldname, plain_str=None,num_visible=3):
 		s = plain_str or self.get(fieldname) or ""
 		if not s: return ""
 		return self.mask_digits(s, num_visible=3)
