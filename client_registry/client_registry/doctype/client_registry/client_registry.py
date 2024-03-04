@@ -78,8 +78,10 @@ class ClientRegistry(Document):
 		message =  "Dear {}. The PIN for your account is {}.".format(self.get("full_name"), self.get_password("pin_number"))
 		response = self.initialize_sms_provider().send(message, [phone])
 		self.add_comment('Comment', text="{}".format(response))
-	def to_fhir(self):
+	def to_fhir(self, **kwargs):
+		unmask = (kwargs or {}).get("unmask")
 		doc = self
+		dob =  str(doc.get("date_of_birth"))
 		fhir = {
 			"resourceType": "Patient",
 			"id": "{}".format(doc.get("name")),
@@ -90,29 +92,29 @@ class ClientRegistry(Document):
 				"source": "{}".format(frappe.utils.get_url()),
 			},
 			"originSystem": {
-				"system": "{}".format(doc.get("registry_system")),
-				"record_id": "{}".format(doc.get("record_id"))
+				"system": "{}".format(doc.get("agent")),
+				"record_id": "{}".format(doc.get("record_id") or "")
 			},
 			"title": doc.get("title") or "",
-			"first_name": doc.get("first_name"),
-			"middle_name": doc.get("middle_name") or "",
-			"last_name": doc.get("last_name") or "",
+			"first_name": doc.get_masked_string("first_name") if not unmask else doc.get("first_name"), 
+			"middle_name": doc.get_masked_string("middle_name") or "" if not unmask else doc.get("middle_name"), 
+			"last_name": doc.get_masked_string("last_name") or "" if not unmask else doc.get("last_name"),
 			"gender": doc.get("gender") or "",
-			"date_of_birth": doc.get("date_of_birth"),
-   			"place_of_birth": doc.get("place_of_birth") or "",
+			"date_of_birth": doc.get_masked_date("date_of_birth") if not unmask else doc.get("date_of_birth"),
+   			"place_of_birth": doc.get("place_of_birth") or "" ,
 			"person_with_disability": doc.get("person_with_disability", 0),
-			"citizenship": doc.get("citizenship") or "",
-			"kra_pin": self.get("kra_pin") or "",
+			"citizenship": doc.get_masked_string("citizenship") or "" if not unmask else doc.get("citizenship"),
+			"kra_pin": self.get_masked_string("kra_pin") or "" if not unmask else doc.get("kra_pin"),
 			"preferred_primary_care_network": self.get("preferred_primary_care_network") or "",
 			"employment_type": doc.get("employment_type") or "",
    			"civil_status": doc.get("civil_status") or "",
 			"identification_type": doc.get("identification_type"),
 			"identification_number": doc.get("identification_number"),
-			"other_identifications": self._other_identifications(),
+			"other_identifications": self._other_identifications(unmask=unmask),
 			"dependants": self.next_of_kins(),
 			"is_alive": doc.get("is_alive") ,
 			"deceased_datetime": doc.get("deceased_datetime") or "",
-			"phone": doc.get("phone") or "",
+			"phone": doc.get_masked_string("phone") or "" if not unmask else doc.get("phone"),
    			"biometrics_verified": doc.get("biometrics_verified") or 0,
 			"biometrics_score": doc.get("aws_rekognition_match") or 0,
 			"email": doc.get("email") or "",
@@ -126,14 +128,14 @@ class ClientRegistry(Document):
 			"longitude": doc.get("longitude") or "",
 			"province_state_country": doc.get("province_state_country") or "",
 			"zip_code": doc.get("zip_code") or "",
-			"identification_residence": doc.get("identification_residence", ""),
+			"identification_residence": doc.get("identification_residence") or "",
 			"employer_name": doc.get("employer_name",""),
-			"employer_pin": doc.get("employer_pin",""),
-			"disability_category": doc.get("disability_category",""),
-			"disability_subcategory": doc.get("disability_subcategory",""),
-			"disability_cause": doc.get("disability_cause",""),
-			"in_lawful_custody": doc.get("in_lawful_custody", 0),
-			"admission_remand_number": doc.get("admission_remand_number", ""),
+			"employer_pin": doc.get_masked_string("employer_pin") or "" if not unmask else doc.get("employer_pin"),
+			"disability_category": doc.get("disability_category") or "",
+			"disability_subcategory": doc.get("disability_subcategory") or "",
+			"disability_cause": doc.get("disability_cause") or "",
+			"in_lawful_custody": doc.get("in_lawful_custody") or "",
+			"admission_remand_number": doc.get_masked_string("admission_remand_number") or "" if not unmask else doc.get("admission_remand_number"),
 			"document_uploads": self.get_uploaded_documents() or [],
 			# "spouse_dependant": self.get("spouse_verified")
 
@@ -145,9 +147,36 @@ class ClientRegistry(Document):
 	
 		}
 		# frappe.msgprint("{}".format(fhir))
+		# if not fhir.get
 		return fhir
+	def get_masked_string(self, fieldname, plain_str=None):
+		s = plain_str or self.get(fieldname) or ""
+		if not s: return ""
+		return self.mask_digits(s, num_visible=3)
+		if len(s) <= 3:
+			return s[0] + s[1] + '*' * (len(s) - 3) + s[-1]
+		else:
+			return s[0] + s[1] + '*' * (len(s) - 4) + s[-1]
+	def mask_digits(self,number_string, num_visible=1):
+		if len(number_string) <= num_visible:
+			return number_string
+		else:
+			masked_part = '*' * (len(number_string) - num_visible)
+			return masked_part + number_string[-num_visible:]
+	def get_masked_date(self,fieldname):
+		date_obj = self.get(fieldname) or ""
+		if not date_obj: return ""
+		split_date = str(date_obj).split("-")
+		str_array = []
+		# print(split_date)
+		str_array = list(map(lambda x: self.mask_digits(str(x)),split_date))
+		return "-".join(str_array)
+	def update_phone(self, phone):
+		self.set("phone" , phone)
+		self.save(ignore_permissions=True)
+		frappe.db.commit()
 	def spouse_dependant(self):
-		sql = "SELECT B.name as id, B.relationship as relationship, B.spouse_verified as spouse_verified, B.parent AS linked_record, A.full_name FROM `tabClient Registry` A INNER JOIN `tabDependants` B ON A.name=B.parent WHERE B.linked_record= '{}'".format(self.get("name"))
+		sql = "SELECT B.name as id, B.relationship as relationship, B.spouse_verified as spouse_verified, B.parent AS linked_record, A.full_name FROM `tabClient Registry` A INNER JOIN `tabDependants` B ON A.name=B.parent WHERE B.relationship='Spouse' AND B.linked_record= '{}'".format(self.get("name"))
 		return frappe.db.sql(sql, as_dict=1)
 	def get_uploaded_documents(self):
 		return frappe.db.get_all("Client Registry Document Upload", filters=dict(client=self.get("name"),docstatus=1), fields=["name","document_type","document_number", "attachment"], order_by="creation desc")
@@ -155,9 +184,10 @@ class ClientRegistry(Document):
 	def next_of_kins(self):
 		payload = self.get("dependants")
 		return list(map(lambda x: dict(linked_record=x.get("linked_record"), full_name="{} {}".format(x.get("first_name"), x.get("last_name")), relationship=x.get("relationship")) ,payload))
-	def _other_identifications(self):
+	def _other_identifications(self, **kwargs):
+		unmask = (kwargs or {}).get("unmask")
 		payload = self.get("other_identification_docs")
-		return list(map(lambda x: dict(identification_type=x.get("identification_type"), identification_number=x.get("identification_number")) ,payload))
+		return list(map(lambda x: dict(identification_type=x.get("identification_type"), identification_number=self.get_masked_string(None, plain_str=x.get("identification_number")) if not unmask else x.get("identification_number"))  ,payload))
 	def update_dependants(self):
 		if not self.get("related_to"): return
 		is_dependant_of_doc = frappe.get_doc("Client Registry",self.get("related_to"))

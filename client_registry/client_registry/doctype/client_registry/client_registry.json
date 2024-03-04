@@ -87,7 +87,8 @@
    "fieldname": "first_name",
    "fieldtype": "Data",
    "label": "First Name",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "middle_name",
@@ -98,7 +99,8 @@
    "fieldname": "last_name",
    "fieldtype": "Data",
    "label": "Last Name",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "column_break_5",
@@ -109,13 +111,15 @@
    "fieldtype": "Link",
    "label": "Gender",
    "options": "Gender",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "date_of_birth",
    "fieldtype": "Date",
    "label": "Date of birth",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "phone",
@@ -137,7 +141,8 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Identification Number",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "column_break_14",
@@ -149,7 +154,8 @@
    "fieldtype": "Link",
    "label": "Identification Type",
    "options": "Identification Type",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "dependants",
@@ -501,7 +507,7 @@
  "image_field": "banner_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-02 17:05:53.954466",
+ "modified": "2024-03-03 05:39:11.831250",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry",
