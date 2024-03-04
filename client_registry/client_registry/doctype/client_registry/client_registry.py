@@ -79,7 +79,7 @@ class ClientRegistry(Document):
 		response = self.initialize_sms_provider().send(message, [phone])
 		self.add_comment('Comment', text="{}".format(response))
 	def to_fhir(self, **kwargs):
-		unmask = (kwargs or {}).get("unmask")
+		unmask = (kwargs or {}).get("unmask") or frappe.db.get_single_value("Client Registry Settings","un_mask_data_on_registration")
 		doc = self
 		dob =  str(doc.get("date_of_birth"))
 		fhir = {
@@ -185,7 +185,7 @@ class ClientRegistry(Document):
 		payload = self.get("dependants")
 		return list(map(lambda x: dict(linked_record=x.get("linked_record"), full_name="{} {}".format(x.get("first_name"), x.get("last_name")), relationship=x.get("relationship")) ,payload))
 	def _other_identifications(self, **kwargs):
-		unmask = (kwargs or {}).get("unmask")
+		unmask = frappe.db.get_single_value("Client Registry Settings","un_mask_data_on_registration") or (kwargs or {}).get("unmask")
 		payload = self.get("other_identification_docs")
 		return list(map(lambda x: dict(identification_type=x.get("identification_type"), identification_number=self.get_masked_string(None, plain_str=x.get("identification_number")) if not unmask else x.get("identification_number"))  ,payload))
 	def update_dependants(self):
@@ -345,3 +345,4 @@ class ClientRegistry(Document):
 			),
 			header=_('Biometrics Confirmation')
 		)
+	

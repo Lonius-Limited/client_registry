@@ -11,7 +11,10 @@
   "africastalking_sms_api",
   "jwt_security",
   "security_hash",
-  "automatically_create_client_from_nrb"
+  "automatically_create_client_from_nrb",
+  "blacklisted_fields_section",
+  "un_mask_data_on_registration",
+  "blacklisted_fields"
  ],
  "fields": [
   {
@@ -40,12 +43,30 @@
    "fieldname": "automatically_create_client_from_nrb",
    "fieldtype": "Check",
    "label": "Automatically Create Client From NRB"
+  },
+  {
+   "description": "These fields cannot be edited in the client registry.",
+   "fieldname": "blacklisted_fields_section",
+   "fieldtype": "Section Break",
+   "label": "Blacklisted Fields Section"
+  },
+  {
+   "fieldname": "blacklisted_fields",
+   "fieldtype": "Table",
+   "label": "Blacklisted Fields",
+   "options": "Client Registry Blacklisted Field"
+  },
+  {
+   "default": "0",
+   "fieldname": "un_mask_data_on_registration",
+   "fieldtype": "Check",
+   "label": "Unmask Data On Registration"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-02-22 11:40:16.570177",
+ "modified": "2024-03-04 14:40:14.071379",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry Settings",
@@ -60,6 +81,13 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Guest",
+   "share": 1
   }
  ],
  "sort_field": "modified",
