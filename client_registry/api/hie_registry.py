@@ -29,7 +29,7 @@ def client_lookup(payload, page_length=5):
 			records = fetch_based_on_other_identifiers(dict(identification_type=payload.get("identification_type"), identification_number=payload.get("identification_number")))
 	for record in records:
 		doc = frappe.get_doc("Client Registry", record.get("name"))
-		result.append(doc.to_fhir())
+		result.append(doc.to_fhir(unmask=1))
 	return dict(total=len(result), result=result)
 @frappe.whitelist()
 def client_lookup_nrb_search(payload, page_length=5):	
@@ -198,28 +198,28 @@ def create_client(payload):
 	# if 
 	frappe.db.commit()
 	return doc.to_fhir()
-# @frappe.whitelist()
-# def upload_documents():
-# 	files = frappe.request.files
-# 	docname = frappe.form_dict.id
-# 	# selfie_obj = files['selfie']
-# 	_context_doc_1 = None
-# 	# if docname:
-# 	_context_doc_1 = frappe.get_doc("Client Registry", docname)
-# 	selfie_content = obj.stream.read()
-# 	selfie_filename = obj.filename
-# 	selfie_ret = frappe.get_doc({
-# 			"doctype": "File",
-# 			"attached_to_doctype": 'Client Registry',#doctype,
-# 			"attached_to_name": docname,
-# 			# "attached_to_field": "client_passport_photo",
-# 			# "folder": folder,
-# 			"file_name": selfie_filename,
-# 			# "file_url": file_url,
-# 			"is_private": 0,
-# 			"content": selfie_content
-# 		})
-# 	selfie_ret.save(ignore_permissions=True)
+@frappe.whitelist()
+def face_biometrics_no_id():
+	files = frappe.request.files
+	docname = frappe.form_dict.id
+	obj = files['selfie']
+	_context_doc_1 = None
+	# if docname:
+	_context_doc_1 = frappe.get_doc("Client Registry", docname)
+	selfie_content = obj.stream.read()
+	selfie_filename = obj.filename
+	selfie_ret = frappe.get_doc({
+			"doctype": "File",
+			"attached_to_doctype": 'Client Registry',#doctype,
+			"attached_to_name": docname,
+			# "attached_to_field": "client_passport_photo",
+			# "folder": folder,
+			"file_name": selfie_filename,
+			# "file_url": file_url,
+			"is_private": 0,
+			"content": selfie_content
+		})
+	selfie_ret.save(ignore_permissions=True)
 @frappe.whitelist()    
 def face_biometric_validation():
 	files = frappe.request.files
@@ -317,26 +317,27 @@ def face_biometric_validation():
 	return frappe.get_doc("Client Registry",docname).to_fhir()
 	# return image_comparison_aws_rekognition(urls_to_compare)
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=1)
 def update_client(payload):#TBD-->Make sure encoded_pin is (*args, **kwargs))
 	if isinstance(payload, str):
 		payload =json.loads(payload)
 	# ==================================================================
 	encoded_pin = payload.pop("encoded_pin", None)
  
-	# if not encoded_pin: frappe.throw("Client PIN is required for this client inorder to update this record.")
+	if not encoded_pin: frappe.throw("Client PIN is required for this client inorder to update this record.")
  
-	# wt_secret = frappe.db.get_single_value("Client Registry Settings","security_hash")
+	wt_secret = frappe.db.get_single_value("Client Registry Settings","security_hash")
  
-	# if not wt_secret: frappe.throw("Error: Critical security configuration is missing. Please contact the System Administrator")
+	if not wt_secret: frappe.throw("Error: Critical security configuration is missing. Please contact the System Administrator")
 	
-	# pin_number = jwt.decode(encoded_pin, wt_secret, algorithms=["HS256"])["pin_number"]
+	pin_number = jwt.decode(encoded_pin, wt_secret, algorithms=["HS256"])["pin_number"]
 
 	# #=====================================================================
+	docname = payload.pop("id")
  
-	doc = frappe.get_doc("Client Registry", payload.pop("id"))
+	doc = frappe.get_doc("Client Registry", docname)
  
-	# if not doc.validate_pin(pin_number) : frappe.throw("Invalid PIN, please reset and/or try again")
+	if not doc.validate_pin(pin_number) : frappe.throw("Invalid PIN, please reset and/or try again")
  
 	#=====================================================================
 	valid_keys = list(dict.fromkeys(doc.__dict__))
@@ -503,8 +504,15 @@ def reset_pin(*args, **kwargs):
 	id = payload["id"]
 	encoded_pin = payload["encoded_pin"]
 	pin = jwt.decode(encoded_pin, wt_secret, algorithms=["HS256"])["pin_number"]
+	# if "phone" in list(dict.fromkeys(payload)):
+	# 	frappe.db.set_value("Client Registry", id, "phone", payload["phone"], update_modified=True)
+	# 	frappe.db.commit()
 	doc = frappe.get_doc("Client Registry", id)
 	doc.generate_pin(pin_number=pin)
+	if "phone" in list(dict.fromkeys(payload)):
+		doc.update_phone(payload["phone"])
+	# if "phone" in list(dict.fromkeys(payload)):
+	# 	doc.update_phone(payload["phone"])
 def read_image(file_path):
 	with open(file_path, "rb") as file:
 		image_bytes = file.read()
