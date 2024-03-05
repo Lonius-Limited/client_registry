@@ -32,5 +32,6 @@ frappe.ui.form.on('Client Registry', {
 		  },);
 
 		  //image_rekognition_match
-	}
+	},
+	
 });

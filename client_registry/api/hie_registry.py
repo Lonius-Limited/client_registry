@@ -341,7 +341,12 @@ def update_client(payload):#TBD-->Make sure encoded_pin is (*args, **kwargs))
  
 	#=====================================================================
 	valid_keys = list(dict.fromkeys(doc.__dict__))
-	keys = [x for x in list(dict.fromkeys(payload)) if x in valid_keys] #Don't send bogus keys, we won't bother. Is it a good idea?
+	#Second Check--> are the fields blacklisted?
+	fields = frappe.get_doc("Client Registry Settings").get("blacklisted_fields")
+	blacklisted_fields = list(filter(lambda x: x.blacklisted==1, fields))
+	blacklisted_fieldnames =[x.get("field_name") for x in blacklisted_fields]
+	#-->End second check
+	keys = [x for x in list(dict.fromkeys(payload)) if x in valid_keys and x not in blacklisted_fieldnames] #Don't send bogus keys, we won't bother. Is it a good idea?
 	for k in keys:
 		doc.set(k, payload[k])
 	other_ids = payload.pop("other_identifications", None)
