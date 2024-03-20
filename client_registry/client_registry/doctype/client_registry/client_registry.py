@@ -24,6 +24,17 @@ class ClientRegistry(Document):
 		self.to_fhir()
 		self.set_banner_image()
 		# pass
+	def get_iprs_search_method(self,identification_type="National ID"):
+		return frappe.get_value("Identification Type", identification_type, ["iprs_soap_method","iprs_soap_query_field"], as_dict=1)
+	def iprs_search(self):
+		from iprs import IPRS
+		identification_type, id = self.get("identification_type"), self.get("identification_number")
+		soap_method = self.get_iprs_search_method(identification_type)["iprs_soap_method"]
+		soap_query_field = self.get_iprs_search_method(identification_type)["iprs_soap_query_field"]
+		if not soap_query_field or soap_method: frappe.throw("IPRS Configurations not done on the Identification Document type")
+		q_args = dict(query_type=soap_method)
+		q_args[soap_query_field] = id
+		return IPRS(q_args)
 	def set_banner_image(self):
 		old_doc = self.get_doc_before_save()
 		# if old_doc.get("client_passport_photo") != self.get("client_passport_photo"):#Only when this changes
