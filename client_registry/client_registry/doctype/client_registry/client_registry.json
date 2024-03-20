@@ -42,6 +42,8 @@
   "employment_type",
   "employer_name",
   "employer_pin",
+  "column_break_rgpa6",
+  "profession",
   "other_ids_section",
   "other_identification_docs",
   "column_break_14",
@@ -502,12 +504,21 @@
    "fieldname": "spouse_verified",
    "fieldtype": "Check",
    "label": "Spouse Verified"
+  },
+  {
+   "fieldname": "column_break_rgpa6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "profession",
+   "fieldtype": "Data",
+   "label": "Profession"
   }
  ],
  "image_field": "banner_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-03 05:39:11.831250",
+ "modified": "2024-03-16 16:54:53.928142",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry",

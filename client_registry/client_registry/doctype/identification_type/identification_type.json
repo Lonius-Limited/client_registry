@@ -8,7 +8,9 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "id_type"
+  "id_type",
+  "iprs_soap_method",
+  "iprs_soap_query_field"
  ],
  "fields": [
   {
@@ -18,11 +20,21 @@
    "label": "Id Type",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "iprs_soap_method",
+   "fieldtype": "Data",
+   "label": "IPRS Soap Method"
+  },
+  {
+   "fieldname": "iprs_soap_query_field",
+   "fieldtype": "Data",
+   "label": "IPRS Soap Query Field"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-03 01:24:37.558727",
+ "modified": "2024-03-20 12:47:02.307723",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Identification Type",
