@@ -86,7 +86,8 @@ def fetch_and_post_from_nrb(payload, encoded_pin=None, files=None):
 
 	##################
 	if payload.get("identification_type") :
-		nrb_data = nrb_by_id(identification_number=payload.get("identification_number"))
+		# nrb_data = nrb_by_id(identification_number=payload.get("identification_number"))
+		nrb_data = nrb_by_dynamic_id(payload)
 		if not nrb_data: return dict(total=0, result=[])
 		if nrb_data.get("ErrorCode"): return dict(total=0, result=[])
 		if not frappe.db.get_single_value("Client Registry Settings","automatically_create_client_from_nrb"):
@@ -136,8 +137,6 @@ def fetch_and_post_from_nrb(payload, encoded_pin=None, files=None):
 					})
 				selfie_ret.save(ignore_permissions=True)
 				frappe.db.commit()
-			# doc.set("pin_number",pin_number)
-			# doc.save()
 			frappe.db.commit()
 			doc.add_comment('Comment', text="{}".format(json.dumps(nrb_data)))
 			return doc.to_fhir()
@@ -153,7 +152,8 @@ def fetch_and_post_from_nrb(payload, encoded_pin=None, files=None):
 	else:
 		return dict(total=0, result=[])
 		
-	
+# def insert_nrb_data(nrb_args):
+#     pass	
 
 @frappe.whitelist()
 def client_nrb_lookup(payload, page_length=5):
@@ -495,7 +495,7 @@ def validate_otp(*args, **kwargs):
 	record.save(ignore_permissions=1)
 	return dict(status="Valid")
 @frappe.whitelist()
-def nrb_by_dynamic_id(*args, **kwargs):
+def nrb_by_dynamic_id(*args, **kwargs):#IPRS btw
 	payload = kwargs
 	from iprs import IPRS
 	identification_type, id = payload.get("identification_type"), payload.get("identification_number")
