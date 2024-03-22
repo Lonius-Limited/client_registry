@@ -70,7 +70,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Relationship",
-   "options": "\nSpouse\nMother\nFather\nSon\nDaughter\nNuclear Family"
+   "options": "\nSpouse\nMother\nFather\nSon\nDaughter\nNuclear Family\nGuardian"
   },
   {
    "default": "0",
@@ -82,7 +82,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-02 17:30:17.942533",
+ "modified": "2024-03-22 21:16:32.127180",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Dependants",

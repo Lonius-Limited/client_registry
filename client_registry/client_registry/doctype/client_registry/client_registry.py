@@ -36,7 +36,7 @@ class ClientRegistry(Document):
 		q_args = dict(query_type=soap_method)
 		q_args[soap_query_field] = id
 		# frappe.throw("{}".format(q_args))
-		return IPRS(**q_args)
+		return IPRS(**q_args).query_iprs()
 	def set_banner_image(self):
 		old_doc = self.get_doc_before_save()
 		# if old_doc.get("client_passport_photo") != self.get("client_passport_photo"):#Only when this changes
