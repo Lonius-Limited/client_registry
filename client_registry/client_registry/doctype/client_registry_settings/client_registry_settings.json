@@ -9,6 +9,11 @@
  "field_order": [
   "africastalking_settings_section",
   "africastalking_sms_api",
+  "neamis_settings_section",
+  "neamis_username",
+  "column_break_vg8q8",
+  "neamis_password",
+  "safaricom_validation_settings_section",
   "jwt_security",
   "security_hash",
   "automatically_create_client_from_nrb",
@@ -61,12 +66,38 @@
    "fieldname": "un_mask_data_on_registration",
    "fieldtype": "Check",
    "label": "Unmask Data On Registration"
+  },
+  {
+   "default": "safcomadmin",
+   "fieldname": "neamis_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Neamis Settings"
+  },
+  {
+   "default": "safcomadmin",
+   "fieldname": "neamis_username",
+   "fieldtype": "Data",
+   "label": "Neamis Username"
+  },
+  {
+   "fieldname": "neamis_password",
+   "fieldtype": "Password",
+   "label": "Neamis Password"
+  },
+  {
+   "fieldname": "column_break_vg8q8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "safaricom_validation_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Safaricom Validation Settings"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-03-04 14:40:14.071379",
+ "modified": "2024-03-22 15:41:58.427521",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry Settings",

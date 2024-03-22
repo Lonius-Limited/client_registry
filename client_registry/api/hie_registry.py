@@ -36,7 +36,7 @@ def client_lookup_nrb_search(payload, page_length=5):
 	# files = frappe.request.files
 	# docname = frappe.form_dict.id
 
-    
+	
 	# payload = kwargs
 	# {'identification_type': 'National ID',
 	# 'identification_number': '27613716',
@@ -67,7 +67,7 @@ def client_lookup_nrb_search(payload, page_length=5):
 	if (len(result)<1): return fetch_and_post_from_nrb(payload, encoded_pin, files=None)
 	return dict(total=len(result), result=result)
 def fetch_and_post_from_nrb(payload, encoded_pin=None, files=None):
-    ###Another check
+	###Another check
 	exists = frappe.db.get_value("Client Registry",dict(identification_number=payload.get("identification_number"),identification_type = payload.get("identification_type")),"name")
 	if exists:
 		doc = frappe.get_doc("Client Registry", exists)
@@ -86,7 +86,8 @@ def fetch_and_post_from_nrb(payload, encoded_pin=None, files=None):
 
 	##################
 	if payload.get("identification_type") :
-		nrb_data = nrb_by_id(identification_number=payload.get("identification_number"))
+		# nrb_data = nrb_by_id(identification_number=payload.get("identification_number"))
+		nrb_data = nrb_by_dynamic_id(payload)
 		if not nrb_data: return dict(total=0, result=[])
 		if nrb_data.get("ErrorCode"): return dict(total=0, result=[])
 		if not frappe.db.get_single_value("Client Registry Settings","automatically_create_client_from_nrb"):
@@ -136,8 +137,6 @@ def fetch_and_post_from_nrb(payload, encoded_pin=None, files=None):
 					})
 				selfie_ret.save(ignore_permissions=True)
 				frappe.db.commit()
-			# doc.set("pin_number",pin_number)
-			# doc.save()
 			frappe.db.commit()
 			doc.add_comment('Comment', text="{}".format(json.dumps(nrb_data)))
 			return doc.to_fhir()
@@ -153,7 +152,8 @@ def fetch_and_post_from_nrb(payload, encoded_pin=None, files=None):
 	else:
 		return dict(total=0, result=[])
 		
-	
+# def insert_nrb_data(nrb_args):
+#     pass	
 
 @frappe.whitelist()
 def client_nrb_lookup(payload, page_length=5):
@@ -495,6 +495,78 @@ def validate_otp(*args, **kwargs):
 	record.save(ignore_permissions=1)
 	return dict(status="Valid")
 @frappe.whitelist()
+def nrb_by_dynamic_id(*args, **kwargs):#IPRS btw
+	payload = kwargs
+	from iprs import IPRS
+	identification_type, id = payload.get("identification_type"), payload.get("identification_number")
+	identification_type_doc = frappe.get_doc("Identification Type",identification_type)
+	soap_method = identification_type_doc.get("iprs_soap_method")
+	soap_query_field = identification_type_doc.get("iprs_soap_query_field")
+	if not (soap_query_field or soap_method): frappe.throw("IPRS Configurations not done on the Identification Document type")
+	q_args = dict(query_type=soap_method)
+	q_args[soap_query_field] = id
+	# frappe.throw("{}".format(q_args))
+	return IPRS(**q_args).query_iprs()
+@frappe.whitelist()
+def nemis_my_kids_by_id(*args, **kwargs):
+	payload = kwargs
+	cr_id = payload.get("id")
+	doc_exists = frappe.db.get_value("Client Registry",cr_id, "name")
+	if not doc_exists: frappe.throw(f"Sorry, this Client Registry ID does not exist: {cr_id}")
+	national_id = frappe.db.get_value("Client Registry",doc_exists,"identification_number")
+	url = 'http://nemis.education.go.ke/generic2/api/Learner/MyChildren/{}'.format(national_id)
+	cr_settings = frappe.get_doc("Client Registry Settings")
+	response = requests.get(url, auth=(cr_settings.get("neamis_username"), cr_settings.get_password("neamis_password"))).json()
+	fhir_response = dict(total=len(response or []))
+	fhir_records= []
+	if response:
+		for nrb_data in response:
+			gender = "Female"
+			if nrb_data.get("gender") == "M" : gender ="Male"
+			date_string = nrb_data.get("dob").split(" ")[0] 
+			date_format = "%d-%m-%Y"
+			dob = datetime.strptime(date_string, date_format)
+			exists =  frappe.db.get_value("Client Registry", dict(identification_type="Birth Certificate", identification_number=nrb_data.get("birth_Cert_No")),"name")
+			relationship = "Mother" #The most likely to gethere first
+			if national_id == nrb_data.get("father_IDNo"): relationship = "Father"
+			if national_id == nrb_data.get("guardian_IDNo"): relationship = "Guardian"
+			if exists:
+				_doc = frappe.get_doc("Client Registry", exists)
+				fhir_records.append(_doc.to_fhir())
+				continue
+			try:
+				args = dict(
+					doctype="Client Registry",
+					first_name = nrb_data.get("firstName"),
+					last_name = nrb_data.get("surname"),
+					middle_name = nrb_data.get("otherName") or "",
+					gender = gender,
+					date_of_birth = dob,
+					identification_type = "Birth Certificate",
+					identification_number = nrb_data.get("birth_Cert_No"),
+					citizenship = "KENYAN" if  nrb_data.get("nationality") == "1" else None,
+					# latitude = nrb_data.get("latitude"),
+					# longitude = nrb_data.get("longitude"),
+					county = nrb_data.get("county_Name"),
+					sub_county = nrb_data.get("sub_County_Name"),
+					phone= nrb_data.get("tel_Number") or nrb_data.get("mobile_Number1"),
+					email = nrb_data.get("email_Address"),
+					related_to = cr_id,
+					relationship = relationship,
+					agent = payload.get("agent")
+				)
+				doc = frappe.get_doc(args).insert(ignore_permissions=1, ignore_mandatory=1)
+				frappe.db.commit()
+				doc.add_comment('Comment', text="{}".format(json.dumps(nrb_data)))
+				frappe.db.commit()
+				fhir_records.append(doc.to_fhir())
+				# return doc.to_fhir()
+			except Exception as e:
+				frappe.throw("{}".format(e))
+				return dict(error="{}".format(e))
+	fhir_response["result"] = fhir_records
+	return fhir_response
+@frappe.whitelist()
 def nrb_by_id(*args, **kwargs):
 	payload = kwargs
 	id = payload["identification_number"]
@@ -545,13 +617,13 @@ def image_comparison_aws_rekognition(files):#Array of two s3 sources
  
 	# response = _REKOGNITION_CLIENT.compare_faces(SimilarityThreshold=90,
 	# 								SourceImage={"S3Object": {
-    #         "Bucket": bucket_name,
-    #         "Name": sourceFile.rpartition("/"[-1])[2]
-    #     }},
+	#         "Bucket": bucket_name,
+	#         "Name": sourceFile.rpartition("/"[-1])[2]
+	#     }},
 	# 								TargetImage={"S3Object": {
-    #         "Bucket": bucket_name,
-    #         "Name": targetFile.rpartition("/"[-1])[2]
-    #     }}) 
+	#         "Bucket": bucket_name,
+	#         "Name": targetFile.rpartition("/"[-1])[2]
+	#     }}) 
 	# return type(imageTarget)
 
 	response = _REKOGNITION_CLIENT.compare_faces(SimilarityThreshold=90,

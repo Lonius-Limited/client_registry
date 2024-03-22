@@ -256,7 +256,7 @@
    "fieldname": "relationship",
    "fieldtype": "Select",
    "label": "Relationship",
-   "options": "\nSpouse\nMother\nFather\nSon\nDaughter\nNuclear Family"
+   "options": "\nSpouse\nMother\nFather\nSon\nDaughter\nNuclear Family\nGuardian"
   },
   {
    "fieldname": "facility_code",
@@ -518,7 +518,7 @@
  "image_field": "banner_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-16 16:54:53.928142",
+ "modified": "2024-03-22 21:16:56.528256",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry",
