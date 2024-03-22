@@ -32,6 +32,14 @@ frappe.ui.form.on('Client Registry', {
 		  },);
 
 		  //image_rekognition_match
+		  //NRB Maneno
+		  frm.add_custom_button(__("Rerun Biometrics"), function(){
+			//perform desired action such as routing to new form or fetching etc.
+			frm.call('iprs_search').then(r=>{
+				// frm.call('client_pin')
+				console.log(r)
+			})
+		  },);
 	},
 	
 });

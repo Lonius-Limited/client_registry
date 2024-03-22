@@ -9,7 +9,7 @@ frappe.ui.form.on('Client Registry Settings', {
 		// frappe.msgprint("I am adding fields")
 		const method = "client_registry.client_registry.doctype.client_registry_settings.client_registry_settings.all_client_registry_fields";
 		const freeze = true;
-		const freeze_message = "Please wait as we update fields"
+		const freeze_message = "Please wait as we update fields";
 		frappe.call({ method }).then(r => {
 			
 			let currentFields = frm.doc.blacklisted_fields.map(x => x.field_name);
