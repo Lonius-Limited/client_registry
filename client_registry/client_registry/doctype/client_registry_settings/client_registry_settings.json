@@ -14,6 +14,12 @@
   "column_break_vg8q8",
   "neamis_password",
   "safaricom_validation_settings_section",
+  "token_url",
+  "token_username",
+  "token_password",
+  "column_break_9lovs",
+  "validate_url",
+  "validate_shortcode",
   "jwt_security",
   "security_hash",
   "automatically_create_client_from_nrb",
@@ -92,12 +98,41 @@
    "fieldname": "safaricom_validation_settings_section",
    "fieldtype": "Section Break",
    "label": "Safaricom Validation Settings"
+  },
+  {
+   "fieldname": "column_break_9lovs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "validate_url",
+   "fieldtype": "Data",
+   "label": "Validate URL"
+  },
+  {
+   "fieldname": "token_url",
+   "fieldtype": "Data",
+   "label": "Token URL"
+  },
+  {
+   "fieldname": "token_username",
+   "fieldtype": "Data",
+   "label": "Token Username"
+  },
+  {
+   "fieldname": "token_password",
+   "fieldtype": "Password",
+   "label": "Token Password"
+  },
+  {
+   "fieldname": "validate_shortcode",
+   "fieldtype": "Data",
+   "label": "Validate ShortCode"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-03-22 15:41:58.427521",
+ "modified": "2024-03-23 16:52:41.530862",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry Settings",
