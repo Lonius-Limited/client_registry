@@ -34,6 +34,7 @@
   "client_identifier_photo_id",
   "column_break_47bdy",
   "identification_number",
+  "nrb_image",
   "fingerprints_section",
   "fingerprint_left_thumb",
   "column_break_2chdu",
@@ -513,12 +514,17 @@
    "fieldname": "profession",
    "fieldtype": "Data",
    "label": "Profession"
+  },
+  {
+   "fieldname": "nrb_image",
+   "fieldtype": "Long Text",
+   "label": "NRB Image"
   }
  ],
  "image_field": "banner_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-22 21:16:56.528256",
+ "modified": "2024-03-24 11:10:06.503461",
  "modified_by": "Administrator",
  "module": "Client Registry",
  "name": "Client Registry",
