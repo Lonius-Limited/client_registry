@@ -121,7 +121,7 @@ def fetch_and_post_from_nrb(payload, encoded_pin=None, files=None):
 				identification_residence = nrb_data.Place_of_Live or None,
 				identification_type = payload.get("identification_type"),
 				identification_number = payload.get("identification_number"),
-				citizenship = nrb_data.Citizenship.upper(),
+				citizenship = (nrb_data.Citizenship or "").upper(),
 				place_of_birth = nrb_data.Place_of_Birth,
 				pin_number = pin_number,
 				agent = payload.get("agent")
