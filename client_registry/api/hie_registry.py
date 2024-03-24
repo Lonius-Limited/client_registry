@@ -65,7 +65,9 @@ def client_lookup_nrb_search(payload, page_length=5):
 	for record in records:
 		doc = frappe.get_doc("Client Registry", record.get("name"))
 		result.append(doc.to_fhir())
-	if (len(result)<1): return fetch_and_post_from_nrb(payload, encoded_pin, files=None)
+	if (len(result)<1):
+		print("Searching In NRB Sources")
+		return fetch_and_post_from_nrb(payload, encoded_pin, files=None)
 	return dict(total=len(result), result=result)
 def fetch_and_post_from_nrb(payload, encoded_pin=None, files=None):
 	###Another check
@@ -94,6 +96,7 @@ def fetch_and_post_from_nrb(payload, encoded_pin=None, files=None):
 		nrb_data = nrb_by_dynamic_id(**payload)
 		if not nrb_data: return dict(total=0, result=[])
 		if nrb_data.ErrorCode: return dict(total=0, result=[])
+		print(nrb_data.ErrorCode)
 		if not frappe.db.get_single_value("Client Registry Settings","automatically_create_client_from_nrb"):
 			return dict(nrb_data=nrb_data)
 		gender = "Female"
@@ -142,14 +145,16 @@ def fetch_and_post_from_nrb(payload, encoded_pin=None, files=None):
 				selfie_ret.save(ignore_permissions=True)
 				frappe.db.commit()
 			frappe.db.commit()
-			doc.add_comment('Comment', text="{}".format(json.dumps(nrb_data)))
+			doc.add_comment('Comment', text="{}".format(nrb_data.__dict__))
 			return doc.to_fhir()
 		except Exception as e:
+			print("{}".format(e))
 			frappe.db.rollback()
 			exists = frappe.db.get_value("Client Registry",dict(identification_number=payload.get("identification_number"),identification_type = payload.get("identification_type")),"name")
 			if exists:
 				doc = frappe.get_doc("Client Registry", exists)
 				return doc.to_fhir()
+			return dict(error="{}".format(e))
 			# frappe.throw("{}".format(e))
 			
 		
