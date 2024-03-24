@@ -93,12 +93,12 @@ def fetch_and_post_from_nrb(payload, encoded_pin=None, files=None):
 			return n.create_client()
 		nrb_data = nrb_by_dynamic_id(**payload)
 		if not nrb_data: return dict(total=0, result=[])
-		if nrb_data.get("ErrorCode"): return dict(total=0, result=[])
+		if nrb_data.ErrorCode: return dict(total=0, result=[])
 		if not frappe.db.get_single_value("Client Registry Settings","automatically_create_client_from_nrb"):
 			return dict(nrb_data=nrb_data)
 		gender = "Female"
-		if nrb_data.get("Gender") == "M" : gender ="Male"
-		date_string = nrb_data.get("Date_of_Birth").split(" ")[0] 
+		if nrb_data.Gender == "M" : gender ="Male"
+		date_string = nrb_data.Date_of_Birth.split(" ")[0] 
 		date_format = "%m/%d/%Y"
 		dob = datetime.strptime(date_string, date_format)
 		print(payload.get("date_of_birth"))
@@ -109,17 +109,17 @@ def fetch_and_post_from_nrb(payload, encoded_pin=None, files=None):
 		try:
 			args = dict(
 				doctype="Client Registry",
-				first_name = nrb_data.get("First_Name"),
-				last_name = nrb_data.get("Surname"),
-				middle_name = nrb_data.get("Other_Name") or "",
+				first_name = nrb_data.First_Name,
+				last_name = nrb_data.Surname,
+				middle_name = nrb_data.Other_Name or "",
 				gender = gender,
 				date_of_birth = dob,
 				# civil_status = nrb_data.get(""),
-				identification_residence = nrb_data.get("Place_of_Live", None),
+				identification_residence = nrb_data.Place_of_Live or None,
 				identification_type = payload.get("identification_type"),
 				identification_number = payload.get("identification_number"),
-				citizenship = nrb_data.get("Citizenship").upper(),
-				place_of_birth = nrb_data.get("Place_of_Birth"),
+				citizenship = nrb_data.Citizenship.upper(),
+				place_of_birth = nrb_data.Place_of_Birth,
 				pin_number = pin_number,
 				agent = payload.get("agent")
 			)
