@@ -5,7 +5,7 @@ __version__ = '0.0.1'
 # Some Comment
 def execute():
     genders = ["Male","Female","Prefer not to say","Non-Conforming","Other","Transgender"]
-    identity_types =["National ID","Passport","Birth Certificate","Alien ID","KRA PIN"]
+    identity_types =["National ID","Passport","Birth Certificate","Alien ID","KRA PIN","Refugee ID","Diplomat ID"]
     for g in genders:
         if not frappe.db.get_value("Gender",dict(gender=g)):
             args = dict(gender=g, doctype="Gender")

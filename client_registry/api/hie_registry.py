@@ -5,7 +5,7 @@ import string, random, requests
 from datetime import datetime
 from frappe import _
 import urllib
-
+from client_registry.api.nrb import NRB
 N=4
 
 # import numpy as np
@@ -15,6 +15,7 @@ def client_lookup(payload, page_length=5):
 	result = []
 	if isinstance(payload, str):
 		payload =json.loads(payload)
+	#Star
 	# page_length = payload.pop("page_length", 5)
 	or_filters = payload
 	filters_from_user =  list(dict.fromkeys(or_filters))
@@ -87,6 +88,9 @@ def fetch_and_post_from_nrb(payload, encoded_pin=None, files=None):
 	##################
 	if payload.get("identification_type") :
 		# nrb_data = nrb_by_id(identification_number=payload.get("identification_number"))
+		if payload.get("identification_type") in ["citizen","alien","refugee"]:
+			n = NRB(pin_number, **payload)
+			return n.create_client()
 		nrb_data = nrb_by_dynamic_id(payload)
 		if not nrb_data: return dict(total=0, result=[])
 		if nrb_data.get("ErrorCode"): return dict(total=0, result=[])

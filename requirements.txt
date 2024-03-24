@@ -3,4 +3,5 @@ python-jose
 africastalking
 boto3
 face_recognition
+pillow
 # urllib
