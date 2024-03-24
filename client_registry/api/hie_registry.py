@@ -91,7 +91,7 @@ def fetch_and_post_from_nrb(payload, encoded_pin=None, files=None):
 		if payload.get("identification_type") in ["citizen","alien","refugee"]:
 			n = NRB(pin_number, **payload)
 			return n.create_client()
-		nrb_data = nrb_by_dynamic_id(payload)
+		nrb_data = nrb_by_dynamic_id(**payload)
 		if not nrb_data: return dict(total=0, result=[])
 		if nrb_data.get("ErrorCode"): return dict(total=0, result=[])
 		if not frappe.db.get_single_value("Client Registry Settings","automatically_create_client_from_nrb"):
