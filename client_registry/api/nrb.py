@@ -94,9 +94,3 @@ class NRB():
         selfie_ret.save(ignore_permissions=True)
         frappe.db.commit()
         
-#         {
-#     "agent": "ECITIZEN-SELF-REGISTRATION",
-#     "identification_type": "National ID",
-#     "identification_number": "2613716",
-#     "encoded_pin": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaW5fbnVtYmVyIjoiOTIwNiJ9.zHvi2Q27fKcl_QT5K3QclTl_x4txOc08zxMVoc-DWgc"
-#   }

@@ -124,7 +124,8 @@ def fetch_and_post_from_nrb(payload, encoded_pin=None, files=None):
 				citizenship = (nrb_data.Citizenship or "").upper(),
 				place_of_birth = nrb_data.Place_of_Birth,
 				pin_number = pin_number,
-				agent = payload.get("agent")
+				agent = payload.get("agent"),
+				nrb_image = nrb_data.Photo or ""
 			)
 			doc = frappe.get_doc(args).insert(ignore_permissions=1, ignore_mandatory=1)
 			if files:
