@@ -56,7 +56,7 @@ class NRB():
             doc.add_comment('Comment', text="{}".format(json.dumps(nrb_data)))
             # self.parse_image(doc.get("name"), nrb_data=nrb_data)
             frappe.db.commit()
-            return dict(total=1, result=doc.to_fhir())
+            return dict(total=1, result=[doc.to_fhir()])
         except Exception as e:
             frappe.throw("{}".format(e))
     def id_type_parser(self):
