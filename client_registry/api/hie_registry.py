@@ -74,7 +74,7 @@ def fetch_and_post_from_nrb(payload, encoded_pin=None, files=None):
 	exists = frappe.db.get_value("Client Registry",dict(identification_number=payload.get("identification_number"),identification_type = payload.get("identification_type")),"name")
 	if exists:
 		doc = frappe.get_doc("Client Registry", exists)
-		return dict(total=1, result=doc.to_fhir())
+		return dict(total=1, result=[doc.to_fhir()])
 	######
 	if not payload.get("agent"): frappe.throw("Please provide your Agent ID provided during API onboarding")
 	######
@@ -147,14 +147,14 @@ def fetch_and_post_from_nrb(payload, encoded_pin=None, files=None):
 				frappe.db.commit()
 			frappe.db.commit()
 			doc.add_comment('Comment', text="{}".format(nrb_data.__dict__))
-			return dict(total=1, result=doc.to_fhir())
+			return dict(total=1, result=[doc.to_fhir()])
 		except Exception as e:
 			print("{}".format(e))
 			frappe.db.rollback()
 			exists = frappe.db.get_value("Client Registry",dict(identification_number=payload.get("identification_number"),identification_type = payload.get("identification_type")),"name")
 			if exists:
 				doc = frappe.get_doc("Client Registry", exists)
-				return dict(total=1, result=doc.to_fhir())
+				return dict(total=1, result=[doc.to_fhir()])
 			return dict(error="{}".format(e))
 			# frappe.throw("{}".format(e))
 			
@@ -207,7 +207,7 @@ def create_client(payload):
 	doc.save()
 	# if 
 	frappe.db.commit()
-	return dict(total=1, result=doc.to_fhir())
+	return dict(total=1, result=[doc.to_fhir()])
 @frappe.whitelist()
 def face_biometrics_no_id():
 	files = frappe.request.files
@@ -372,7 +372,7 @@ def update_client(payload):#TBD-->Make sure encoded_pin is (*args, **kwargs))
 		update_dependants_manually(doc, dependants)
 		doc.reload()
 	frappe.db.commit()
-	return dict(total=1, result=doc.to_fhir())
+	return dict(total=1, result=[doc.to_fhir()])
 @frappe.whitelist()
 def update_client_v2(payload):#TBD
 	encoded_pin = payload.get("encoded_pin", None)
@@ -406,7 +406,7 @@ def update_client_v2(payload):#TBD
 		update_dependants_manually(doc, dependants)
 		doc.reload()
 	frappe.db.commit()
-	return dict(total=1, result=doc.to_fhir())
+	return dict(total=1, result=[doc.to_fhir()])
 def validate_resource_type(resource):
 	if not resource.get("Patient"):
 		return dict(status="error",error_desc="Invalid resource type")
