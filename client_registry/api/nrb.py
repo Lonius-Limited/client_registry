@@ -59,6 +59,8 @@ class NRB():
             return dict(total=1, result=[doc.to_fhir()])
         except Exception as e:
             frappe.throw("{}".format(e))
+    def return_photo_str(self):
+        pass
     def id_type_parser(self):
         id_type= self.identification_type
         if id_type=="citizen":

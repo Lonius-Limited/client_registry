@@ -4,6 +4,7 @@
 import frappe, jwt, random, string, africastalking
 from frappe.model.document import Document
 from frappe import _
+from client_registry.api.nrb import NRB
 N = 4
 
 
@@ -24,6 +25,8 @@ class ClientRegistry(Document):
 		self.to_fhir()
 		self.set_banner_image()
 		# pass
+		if not self.nrb_image:
+			self.nrb_image = self.fetch_nrb_photo()
 	def get_iprs_search_method(self,identification_type="National ID"):
 		return frappe.get_value("Identification Type", identification_type, ["iprs_soap_method","iprs_soap_query_field"], as_dict=1)
 	@frappe.whitelist()
@@ -130,7 +133,7 @@ class ClientRegistry(Document):
 			"phone": doc.get_masked_string("phone") or "" if not unmask else doc.get("phone"),
    			"biometrics_verified": doc.get("biometrics_verified") or 0,
 			"biometrics_score": doc.get("aws_rekognition_match") or 0,
-			"email": doc.get_masked_string("email") or "" if not unmask else doc.get("email"),
+			"email": doc.get_masked_string("email") or "" if not unmask else doc.get("email") or "",
 			"country": doc.get("country") or "",
 			"county": doc.get("county") or "",
 			"sub_county": doc.get("sub_county") or "",
@@ -142,14 +145,15 @@ class ClientRegistry(Document):
 			"province_state_country": doc.get("province_state_country") or "",
 			"zip_code": doc.get("zip_code") or "",
 			"identification_residence": doc.get("identification_residence") or "",
-			"employer_name": doc.get("employer_name",""),
-			"employer_pin": doc.get_masked_string("employer_pin") or "" if not unmask else doc.get("employer_pin"),
+			"employer_name": doc.get("employer_name","") or  "",
+			"employer_pin": doc.get_masked_string("employer_pin") or "" if not unmask else doc.get("employer_pin") or "",
 			"disability_category": doc.get("disability_category") or "",
 			"disability_subcategory": doc.get("disability_subcategory") or "",
 			"disability_cause": doc.get("disability_cause") or "",
 			"in_lawful_custody": doc.get("in_lawful_custody") or "",
-			"admission_remand_number": doc.get_masked_string("admission_remand_number") or "" if not unmask else doc.get("admission_remand_number"),
+			"admission_remand_number": doc.get_masked_string("admission_remand_number") or "" if not unmask else doc.get("admission_remand_number") or "",
 			"document_uploads": self.get_uploaded_documents() or [],
+			"photo": self.fetch_nrb_photo()
 			# "spouse_dependant": self.get("spouse_verified")
 
 			# "related_to": doc.get("related_to") or "",
@@ -162,6 +166,22 @@ class ClientRegistry(Document):
 		# frappe.msgprint("{}".format(fhir))
 		# if not fhir.get
 		return fhir
+	def fetch_nrb_photo(self):
+		if self.nrb_image: return self.nrb_image
+		ecitizen_thing = self.ecitizen_mapper()
+		payload = dict(identification_type=ecitizen_thing, identification_number=self.get("identification_number"))
+		n = NRB("pin_number", **payload)
+		p = n.query_nrb().get("data")
+		if p:
+			return p["photo"] or ""
+		return ""
+	def ecitizen_mapper(self):
+		mapping = {
+			"National ID": "citizen",
+			"Alien ID": "alien",
+			"Refugee ID": "refugee"
+		}
+		return mapping[self.identification_type]
 	def get_masked_string(self, fieldname, plain_str=None,num_visible=3):
 		s = plain_str or self.get(fieldname) or ""
 		if not s: return ""
