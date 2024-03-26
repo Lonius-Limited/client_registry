@@ -15,7 +15,7 @@ class NRB():
     def query_nrb(self):
         endpoint = "{}/nrb-ecitizen-api{}".format(self.hie_url, self.parse_params())
         print(endpoint)
-        response = requests.get(endpoint, auth=(self.hie_username, self.hie_password))
+        response = requests.get(endpoint, auth=(self.hie_username, self.hie_password), timeout=5) or {}
         if response.status_code !=200 : frappe.throw("Error connecting to NRB Database")
         return response.json()
     def parse_params(self):
