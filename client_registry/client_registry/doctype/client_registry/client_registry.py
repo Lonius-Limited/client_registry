@@ -25,8 +25,8 @@ class ClientRegistry(Document):
 		self.to_fhir()
 		self.set_banner_image()
 		# pass
-		if not self.nrb_image:
-			self.nrb_image = self.fetch_nrb_photo()
+		# if not self.nrb_image:
+		# 	self.nrb_image = self.fetch_nrb_photo()
 	def get_iprs_search_method(self,identification_type="National ID"):
 		return frappe.get_value("Identification Type", identification_type, ["iprs_soap_method","iprs_soap_query_field"], as_dict=1)
 	@frappe.whitelist()
