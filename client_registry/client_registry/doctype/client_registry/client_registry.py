@@ -167,14 +167,14 @@ class ClientRegistry(Document):
 		# if not fhir.get
 		return fhir
 	def fetch_nrb_photo(self):
-		if self.nrb_image: return self.nrb_image
-		ecitizen_thing = self.ecitizen_mapper()
-		payload = dict(identification_type=ecitizen_thing, identification_number=self.get("identification_number"))
-		n = NRB("pin_number", **payload)
-		p = n.query_nrb().get("data")
-		if p:
-			return p["photo"] or ""
-		return ""
+		if self.nrb_image: return self.nrb_image or ""
+		# ecitizen_thing = self.ecitizen_mapper()
+		# payload = dict(identification_type=ecitizen_thing, identification_number=self.get("identification_number"))
+		# n = NRB("pin_number", **payload)
+		# p = n.query_nrb().get("data")
+		# if p:
+		# 	return p["photo"] or ""
+		# return ""
 	def ecitizen_mapper(self):
 		mapping = {
 			"National ID": "citizen",
